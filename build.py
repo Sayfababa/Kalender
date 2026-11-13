@@ -54,7 +54,11 @@ body>footer.app-foot{position:fixed;left:0;right:0;bottom:0;margin:0;z-index:5;d
   padding:0 max(22px,env(safe-area-inset-right,0px)) max(6px,calc(env(safe-area-inset-bottom,0px) - 20px)) max(22px,env(safe-area-inset-left,0px))}
 </style>
 <script>
-(function(){var f=document.querySelector(".page>footer");if(f){f.classList.add("app-foot");document.body.appendChild(f)}})();
+(function(){var f=document.querySelector(".page>footer");if(!f)return;f.classList.add("app-foot");document.body.appendChild(f);
+  /* Manche iOS-Versionen lassen den sichtbaren Bereich der Home-Bildschirm-App über dem unteren Rand enden: Lücke ausgleichen */
+  function low(){var g=0;if(navigator.standalone&&window.innerHeight>window.innerWidth){g=Math.max(0,(screen.height||0)-window.innerHeight);if(g>160)g=0}
+    f.style.transform=g?"translateY("+g+"px)":""}
+  low();window.addEventListener("resize",low);window.addEventListener("orientationchange",function(){setTimeout(low,300)})})();
 if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(function(){})}
 </script>
 </body>
