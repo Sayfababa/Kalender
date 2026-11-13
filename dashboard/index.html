@@ -1,13 +1,13 @@
-<title>Die Tageszeitung</title>
+<title>Mein Tag</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;1,8..60,300&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap">
 <style>
 /* Layout: ein Bildschirm, eine Spalte – Titel, Woche, Termine, Aufgaben, Notizen; nur Haarlinien, viel Luft */
 :root{
   --paper:#f8f7f3; --ink:#1a1917; --soft:#8a867c; --line:#dcd8ce; --accent:#8f1d16;
-  --display:"Playfair Display",Didot,Georgia,serif;
-  --body:"Source Serif 4",Georgia,serif;
+  --display:"Inter",-apple-system,system-ui,sans-serif;
+  --body:"Inter",-apple-system,system-ui,sans-serif;
   color-scheme:light;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--paper:#171614;--ink:#ebe7dc;--soft:#8e897e;--line:#34322d;--accent:#d98078;color-scheme:dark}}
@@ -17,21 +17,20 @@ body{background:var(--paper);color:var(--ink);font:300 16px/1.45 var(--body);box
   padding-left:max(22px,env(safe-area-inset-left,0px));padding-right:max(22px,env(safe-area-inset-right,0px));padding-block:14px 14px}
 .page{height:100%;max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
 header{flex:none;text-align:center}
-h1{font:italic 400 clamp(30px,9vw,42px)/1 var(--display);margin:0;letter-spacing:-.01em}
-.date{margin-top:6px;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--soft);font-variant-numeric:tabular-nums}
+.date{font-size:12px;font-weight:400;letter-spacing:.18em;text-transform:uppercase;color:var(--soft);font-variant-numeric:tabular-nums}
 .week{flex:none;display:grid;grid-template-columns:repeat(7,1fr);text-align:center;border-block:1px solid var(--line);padding-block:6px}
 .week button{background:none;border:0;color:var(--ink);padding:4px 0;cursor:pointer;font:400 16px var(--body);font-variant-numeric:tabular-nums;position:relative}
 .week small{display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--soft)}
 .week .today{color:var(--accent)}
-.week .sel{font-family:var(--display);font-style:italic;font-size:19px}
+.week .sel{font-weight:500}
 .week .sel::before{content:"";position:absolute;left:30%;right:30%;bottom:-7px;border-bottom:1px solid var(--ink)}
 .week .has::after{content:"";position:absolute;left:50%;top:2px;width:3px;height:3px;margin-left:10px;border-radius:50%;background:var(--accent)}
 section{display:flex;flex-direction:column;min-height:0}
 #cal{flex:0 1 auto;max-height:28%}
 #tasks{flex:1 1 auto}
 #notesSec{flex:0 0 22%}
-h2{flex:none;display:flex;justify-content:space-between;align-items:baseline;margin:0 0 4px;font:italic 400 19px var(--display)}
-h2 span{font:300 12px var(--body);letter-spacing:.06em;color:var(--soft);font-style:normal}
+h2{flex:none;display:flex;justify-content:space-between;align-items:baseline;margin:0 0 4px;font:500 12px var(--display);letter-spacing:.16em;text-transform:uppercase}
+h2 span{font:300 12px var(--body);letter-spacing:.04em;text-transform:none;color:var(--soft)}
 ul{list-style:none;margin:0;padding:0;overflow-y:auto;min-height:0;flex:1 1 auto}
 li{display:flex;align-items:baseline;gap:12px;padding:5px 0}
 li span{flex:1;min-width:0;overflow-wrap:anywhere}
@@ -44,7 +43,8 @@ li.done .check{background:var(--ink)}
 input[type=text],textarea{font:300 16px var(--body);color:var(--ink);background:transparent;border:0;outline:0}
 form{flex:none;display:flex;gap:10px;border-bottom:1px solid var(--line);padding:4px 0}
 form input{flex:1;min-width:0;padding:2px 0}
-form input::placeholder,textarea::placeholder{color:var(--soft);font-style:italic}
+form input::placeholder,textarea::placeholder{color:var(--soft)}
+.add{flex:none;width:28px;height:28px;border:1px solid var(--ink);border-radius:50%;background:none;color:var(--ink);font:300 18px/1 var(--body);cursor:pointer;padding:0}
 textarea{flex:1;min-height:0;resize:none;padding:4px 0;line-height:1.5;
   background-image:linear-gradient(transparent calc(1.5em - 1px),var(--line) 0);background-size:100% 1.5em;background-attachment:local}
 :focus-visible{outline:1px solid var(--accent);outline-offset:3px}
@@ -52,7 +52,6 @@ textarea{flex:1;min-height:0;resize:none;padding:4px 0;line-height:1.5;
 
 <div class="page">
   <header>
-    <h1>Die Tageszeitung</h1>
     <div class="date" id="date"></div>
   </header>
 
@@ -61,13 +60,13 @@ textarea{flex:1;min-height:0;resize:none;padding:4px 0;line-height:1.5;
   <section id="cal">
     <h2>Termine <span id="selLabel"></span></h2>
     <ul id="eventList"></ul>
-    <form id="eventForm"><input type="text" id="evTime" placeholder="09:00" style="flex:0 0 48px" inputmode="numeric"><input type="text" id="evText" placeholder="Neuer Termin" autocomplete="off"></form>
+    <form id="eventForm"><input type="text" id="evTime" placeholder="09:00" style="flex:0 0 48px" inputmode="numeric"><input type="text" id="evText" placeholder="Neuer Termin" autocomplete="off"><button class="add" type="submit" aria-label="Termin hinzufügen">+</button></form>
   </section>
 
   <section id="tasks">
     <h2>Aufgaben <span id="todoCount"></span></h2>
     <ul id="todoList"></ul>
-    <form id="todoForm"><input type="text" id="todoInput" placeholder="Neue Aufgabe" autocomplete="off"></form>
+    <form id="todoForm"><input type="text" id="todoInput" placeholder="Neue Aufgabe" autocomplete="off"><button class="add" type="submit" aria-label="Aufgabe hinzufügen">+</button></form>
   </section>
 
   <section id="notesSec">
