@@ -1,8 +1,8 @@
 // Offline-Fähigkeit: immer zuerst die neueste Version aus dem Netz, sonst die gespeicherte
-const C = "meintag-v1";
+const C = "meintag-v2";
 self.addEventListener("install", e => {
   self.skipWaiting();
-  e.waitUntil(caches.open(C).then(c => c.addAll(["./", "./index.html", "./icon-180.png", "./manifest.webmanifest"])));
+  e.waitUntil(caches.open(C).then(c => c.addAll(["./", "./index.html", "./icon-180.png", "./manifest.webmanifest", "./fonts/inter.woff2"])));
 });
 self.addEventListener("activate", e => e.waitUntil(self.clients.claim()));
 self.addEventListener("fetch", e => {

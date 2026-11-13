@@ -16,7 +16,10 @@
 /* Sofort Papierfarbe statt weißem Aufblitzen */
 html{background:#f8f7f3}
 @media (prefers-color-scheme: dark){html{background:#171614}}
+@font-face{font-family:"Inter";font-style:normal;font-weight:300 600;font-display:block;src:url(fonts/inter.woff2) format("woff2")}
 body{margin:0}
+/* alle Texte, auch Eingaben, Knöpfe und Zeiten, in derselben Schrift */
+input,textarea,button,select,time,small{font-family:"Inter",-apple-system,system-ui,sans-serif}
 [hidden]{display:none!important}
 </style>
 </head>
@@ -24,7 +27,7 @@ body{margin:0}
 <title>Mein Tag</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;600&display=swap">
+<link rel="preload" href="fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
 <style>
 /* Layout: ein Bildschirm, eine Spalte – Datum, drei Wochen (wischbar), Termine, Aufgaben, Demnächst; nur Haarlinien, viel Luft */
 :root{
@@ -39,6 +42,7 @@ body{background:var(--paper);color:var(--ink);font:300 15px/1.45 var(--body);box
   padding-left:max(22px,env(safe-area-inset-left,0px));padding-right:max(22px,env(safe-area-inset-right,0px));padding-block:14px 10px}
 .page{height:100%;max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:clamp(14px,3.2vh,26px)}
 button{font-family:var(--body);color:var(--ink)}
+input,textarea,time,small{font-family:var(--body)}
 header{flex:none;text-align:center}
 .date,.wlabel,footer button{font-size:11px;font-weight:300;letter-spacing:.18em;text-transform:uppercase;color:var(--soft);font-variant-numeric:tabular-nums}
 

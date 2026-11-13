@@ -17,6 +17,11 @@ src = src.replace(
 )
 assert "Beispiel:" not in src, "Beispiel-Einträge nicht ersetzt"
 
+# Schrift in der App selbst mitliefern: überall dieselbe Inter, auch offline und ohne Google
+link = '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;600&display=swap">'
+assert link in src, "Schrift-Link nicht gefunden"
+src = src.replace(link, '<link rel="preload" href="fonts/inter.woff2" as="font" type="font/woff2" crossorigin>')
+
 head = """<!doctype html>
 <html lang="de">
 <head>
@@ -35,7 +40,10 @@ head = """<!doctype html>
 /* Sofort Papierfarbe statt weißem Aufblitzen */
 html{background:#f8f7f3}
 @media (prefers-color-scheme: dark){html{background:#171614}}
+@font-face{font-family:"Inter";font-style:normal;font-weight:300 600;font-display:block;src:url(fonts/inter.woff2) format("woff2")}
 body{margin:0}
+/* alle Texte, auch Eingaben, Knöpfe und Zeiten, in derselben Schrift */
+input,textarea,button,select,time,small{font-family:"Inter",-apple-system,system-ui,sans-serif}
 [hidden]{display:none!important}
 </style>
 </head>
