@@ -65,10 +65,24 @@ li.lift{opacity:.45}
 .pick .rep{background:none;border:0;padding:0;font:inherit;letter-spacing:inherit;color:var(--ink);cursor:pointer;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px;margin-right:auto}
 .grip{touch-action:none;cursor:grab;color:var(--soft);user-select:none;-webkit-user-select:none;font-size:14px;letter-spacing:-2px;margin-right:-4px}
 .ghost{position:fixed;z-index:50;pointer-events:none;transform:translate(-50%,-120%);background:var(--paper);border:1px solid var(--ink);border-radius:8px;padding:6px 12px;font-size:14px;max-width:70vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 6px 20px rgba(0,0,0,.18)}
-.etime{position:relative;flex:none;cursor:pointer}
-.etime select,.tbox select{-webkit-appearance:none;appearance:none;position:absolute;opacity:0;font-size:16px;border:0;padding:0;margin:0;cursor:pointer}
-.etime select{inset:-6px;width:calc(100% + 12px)}
-.tbox select{inset:0;width:100%;height:100%}
+.etime{position:relative;flex:none;cursor:pointer;background:none;border:0;padding:0;font:inherit}
+.etime::after{content:"";position:absolute;inset:-10px -6px}
+
+/* Uhrzeit-Auswahl: eigenes Blatt im Stil der App */
+#tsheet{position:fixed;inset:0;z-index:70;display:flex;align-items:flex-end;justify-content:center;background:color-mix(in srgb,var(--ink) 14%,transparent)}
+.tpanel{width:100%;max-width:520px;box-sizing:border-box;background:var(--paper);border-top:1px solid var(--line);border-radius:18px 18px 0 0;display:flex;flex-direction:column;gap:12px;
+  padding:18px max(22px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(22px,env(safe-area-inset-left,0px));box-shadow:0 -10px 30px rgba(0,0,0,.08)}
+.thead{display:flex;justify-content:space-between;align-items:baseline}
+.thead h2{margin:0}
+#tval{font:300 28px var(--body);font-variant-numeric:tabular-nums;letter-spacing:.02em}
+#tval.none{color:var(--soft)}
+.tlab{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);margin-bottom:-6px}
+.hgrid,.mgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
+.hgrid button,.mgrid button{background:none;border:1px solid transparent;border-radius:10px;padding:9px 0;font:300 16px var(--body);font-variant-numeric:tabular-nums;cursor:pointer}
+.hgrid button.on,.mgrid button.on{border-color:var(--ink)}
+.tfoot{display:flex;justify-content:space-between;align-items:center;margin-top:4px}
+.tfoot .plain{background:none;border:0;padding:6px 0;font:300 14px var(--body);color:var(--soft);cursor:pointer}
+.tfoot .pill{background:none;border:1px solid var(--ink);border-radius:20px;padding:8px 22px;font:300 14px var(--body);cursor:pointer}
 
 /* Eingabezeilen */
 input[type=text],textarea{font:300 16px var(--body);color:var(--ink);background:transparent;border:0;outline:0}
@@ -112,7 +126,7 @@ footer button{background:none;border:0;padding:4px 0;cursor:pointer;font-size:10
   <section id="cal">
     <h2>Termine <span id="selLabel"></span></h2>
     <ul id="eventList"></ul>
-    <form id="eventForm"><label class="tbox" id="tbox"><span id="tlabel">Uhrzeit</span><select id="evTime" aria-label="Uhrzeit wählen"></select></label><input type="text" id="evText" placeholder="Neuer Termin" autocomplete="off"><button class="add" type="submit" aria-label="Termin hinzufügen">+</button></form>
+    <form id="eventForm"><button type="button" class="tbox" id="tbox"><span id="tlabel">Uhrzeit</span></button><input type="hidden" id="evTime" value=""><input type="text" id="evText" placeholder="Neuer Termin" autocomplete="off"><button class="add" type="submit" aria-label="Termin hinzufügen">+</button></form>
     <div class="pick" id="pick" hidden></div>
   </section>
 
@@ -130,6 +144,15 @@ footer button{background:none;border:0;padding:4px 0;cursor:pointer;font-size:10
   </section>
 
   <footer><button id="backup">Sichern</button><button id="theme"></button></footer>
+</div>
+
+<div id="tsheet" hidden>
+  <div class="tpanel" role="dialog" aria-label="Uhrzeit wählen">
+    <div class="thead"><h2>Uhrzeit</h2><span id="tval">–:–</span></div>
+    <div class="tlab">Stunde</div><div class="hgrid" id="hgrid"></div>
+    <div class="tlab">Minute</div><div class="mgrid" id="mgrid"></div>
+    <div class="tfoot"><button type="button" class="plain" id="tnone">Ohne Uhrzeit</button><button type="button" class="pill" id="tok">Übernehmen</button></div>
+  </div>
 </div>
 
 <div id="sheet" hidden>
@@ -154,7 +177,6 @@ const nextColor=c=>ORDER[(ORDER.indexOf(COL[c]?c:"")+1)%ORDER.length];
 /* Uhrzeiten in 10-Minuten-Schritten, beginnend 06:00 */
 const TIMES=[];for(let k=0;k<144;k++){const m=(360+k*10)%1440;TIMES.push(String(m/60|0).padStart(2,"0")+":"+String(m%60).padStart(2,"0"))}
 function opts(v){const list=v&&!TIMES.includes(v)?[v,...TIMES]:TIMES;return `<option value="">ohne Uhrzeit</option>`+list.map(t=>`<option${t===v?" selected":""}>${esc(t)}</option>`).join("")}
-$("evTime").innerHTML=opts("");
 
 let today=key(new Date());
 let todos=load("todos",[{t:"Beispiel: Zahnarzt anrufen",d:false},{t:"Beispiel: Wocheneinkauf",d:true}]);
@@ -217,19 +239,36 @@ function wirePick(pickId,inputId,formId,create){
 function renderEvents(){
   $("selLabel").textContent=sel===today?"heute":new Date(sel+"T12:00").toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"});
   const ev=evsFor(sel).sort((a,b)=>(a.h||"").localeCompare(b.h||""));
-  $("eventList").innerHTML=ev.map(x=>`<li data-ref="${x.ref}">${x.ref[0]==="e"?`<span class="grip" data-g="${x.ref.slice(2)}" aria-label="Ziehen, um den Termin auf einen anderen Tag zu legen">⋮⋮</span>`:`<button class="repi" data-act="rep" aria-label="${REP[x.r]} – tippen zum Ändern">↻<small>${REPS[x.r]||""}</small></button>`}<label class="etime"><time>${esc(x.h||"—")}</time><select data-act="time" aria-label="Uhrzeit ändern">${opts(x.h||"")}</select></label><button class="cdot" data-act="col" ${COL[x.c]?`data-on style="background:${COL[x.c]}"`:""} aria-label="Farbe ändern"></button><span class="txt" data-act="txt">${esc(x.t)}</span><button class="x" data-act="del" aria-label="${x.ref[0]==="r"?"Serie löschen":"Löschen"}">×</button></li>`).join("");
+  $("eventList").innerHTML=ev.map(x=>`<li data-ref="${x.ref}">${x.ref[0]==="e"?`<span class="grip" data-g="${x.ref.slice(2)}" aria-label="Ziehen, um den Termin auf einen anderen Tag zu legen">⋮⋮</span>`:`<button class="repi" data-act="rep" aria-label="${REP[x.r]} – tippen zum Ändern">↻<small>${REPS[x.r]||""}</small></button>`}<button class="etime" data-act="time" aria-label="Uhrzeit ändern"><time data-act="time">${esc(x.h||"—")}</time></button><button class="cdot" data-act="col" ${COL[x.c]?`data-on style="background:${COL[x.c]}"`:""} aria-label="Farbe ändern"></button><span class="txt" data-act="txt">${esc(x.t)}</span><button class="x" data-act="del" aria-label="${x.ref[0]==="r"?"Serie löschen":"Löschen"}">×</button></li>`).join("");
   save("events",events);save("rec",rec);renderWeek();
 }
-$("eventList").addEventListener("click",e=>{const act=e.target.dataset.act,li=e.target.closest("li[data-ref]");if(!act||!li||act==="time")return;
+$("eventList").addEventListener("click",e=>{const act=e.target.dataset.act,li=e.target.closest("li[data-ref]");if(!act||!li)return;
   const r=li.dataset.ref,o=refObj(r);if(!o)return;
   if(act==="del"){const [t,i]=r.split(":");if(t==="r")rec.splice(+i,1);else{events[sel].splice(+i,1);if(!events[sel].length)delete events[sel]}renderEvents()}
+  else if(act==="time"){openTime(o.h,v=>{o.h=v;renderEvents()})}
   else if(act==="col"){o.c=nextColor(o.c);renderEvents()}
   else if(act==="rep"){const n=REPNEXT[o.r]||"";if(n)o.r=n;else{rec.splice(+r.split(":")[1],1);(events[sel]=events[sel]||[]).push({h:o.h,t:o.t,c:o.c})}renderEvents()}
   else if(act==="txt"){edit(e.target,o.t,v=>{if(v)o.t=v;renderEvents()})}});
 $("eventList").addEventListener("change",e=>{if(e.target.dataset.act!=="time")return;const o=refObj(e.target.closest("li").dataset.ref);if(o){o.h=e.target.value;renderEvents()}});
 wirePick("pick","evText","eventForm",(t,c)=>{const h=$("evTime").value;if(rep)rec.push({t,h,c,r:rep,start:sel});else(events[sel]=events[sel]||[]).push({h,t,c});$("evTime").value="";showTime();renderEvents()});
 function showTime(){const v=$("evTime").value;$("tlabel").textContent=v?v+" Uhr":"Uhrzeit";$("tbox").classList.toggle("set",!!v)}
-$("evTime").addEventListener("change",showTime);
+$("tbox").addEventListener("click",()=>openTime($("evTime").value,v=>{$("evTime").value=v;showTime()}));
+
+/* Uhrzeit-Blatt */
+let tcb=null,th=null,tm=null;
+$("hgrid").innerHTML=Array.from({length:24},(_,h)=>`<button type="button" data-h="${h}">${String(h).padStart(2,"0")}</button>`).join("");
+$("mgrid").innerHTML=[0,10,20,30,40,50].map(m=>`<button type="button" data-m="${m}">:${String(m).padStart(2,"0")}</button>`).join("");
+function tShow(){const v=th==null?"":String(th).padStart(2,"0")+":"+String(tm??0).padStart(2,"0");
+  $("tval").textContent=v||"–:–";$("tval").classList.toggle("none",!v);
+  $("hgrid").querySelectorAll("button").forEach(b=>b.classList.toggle("on",+b.dataset.h===th));
+  $("mgrid").querySelectorAll("button").forEach(b=>b.classList.toggle("on",th!=null&&+b.dataset.m===(tm??0)));return v}
+function openTime(v,cb){tcb=cb;if(v&&/^\d\d:\d\d$/.test(v)){th=+v.slice(0,2);tm=+v.slice(3)}else{th=null;tm=null}tShow();$("tsheet").hidden=false}
+function closeTime(val){$("tsheet").hidden=true;if(val!==undefined&&tcb)tcb(val);tcb=null}
+$("hgrid").addEventListener("click",e=>{const h=e.target.dataset.h;if(h!==undefined){th=+h;if(tm==null)tm=0;tShow()}});
+$("mgrid").addEventListener("click",e=>{const m=e.target.dataset.m;if(m!==undefined){tm=+m;if(th==null)th=new Date().getHours();tShow()}});
+$("tok").addEventListener("click",()=>closeTime(tShow()));
+$("tnone").addEventListener("click",()=>closeTime(""));
+$("tsheet").addEventListener("click",e=>{if(e.target.id==="tsheet")closeTime()});
 
 /* Termin per Ziehen auf einen Tag legen (Finger und Maus) */
 let drag=null;
