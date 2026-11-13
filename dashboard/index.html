@@ -110,7 +110,7 @@ form{flex:none;display:flex;align-items:center;gap:10px;border-bottom:1px solid 
 form input{flex:1;min-width:0;padding:2px 0}
 input::placeholder,textarea::placeholder{color:var(--soft)}
 .inl{flex:1;min-width:0;padding:0;border-bottom:1px solid var(--ink)!important}
-.add,.clkbtn{flex:none;position:relative;width:28px;height:28px;border:1px solid var(--ink);border-radius:50%;background:none;cursor:pointer;padding:0;display:grid;place-items:center;box-sizing:border-box}
+.add,.clkbtn{flex:none;position:relative;width:28px;height:28px;border:0;border-radius:50%;background:none;cursor:pointer;padding:0;display:grid;place-items:center;box-sizing:border-box}
 .add svg,.clkbtn svg{width:28px;height:28px;fill:none;stroke:var(--ink);stroke-width:1.2;stroke-linecap:round;display:block}
 .add::after{content:"";position:absolute;inset:-8px}
 .tbox{flex:none;position:relative;display:flex;align-items:center;gap:8px;background:none;border:0;padding:0;font:300 13px var(--body);color:var(--ink);white-space:nowrap;font-variant-numeric:tabular-nums;cursor:pointer}
@@ -149,21 +149,21 @@ footer button{background:none;border:0;padding:4px 0;cursor:pointer;font-size:10
   <section id="cal">
     <h2>Termine <span id="selLabel"></span></h2>
     <ul id="eventList"></ul>
-    <form id="eventForm"><button type="button" class="tbox" id="tbox" aria-label="Uhrzeit wählen"><span class="clkbtn"><svg viewBox="0 0 28 28" aria-hidden="true"><path d="M14 14V1M14 14h6.5"/></svg></span><span id="tlabel"></span></button><input type="hidden" id="evTime" value=""><input type="text" id="evText" placeholder="Neuer Termin" autocomplete="off"><button class="add" type="submit" aria-label="Termin hinzufügen"><svg viewBox="0 0 28 28" aria-hidden="true"><path d="M14 8.5v11M8.5 14h11"/></svg></button></form>
+    <form id="eventForm"><button type="button" class="tbox" id="tbox" aria-label="Uhrzeit wählen"><span class="clkbtn"><svg viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="13.4" stroke-width="1"/><path d="M14 14V0.6M14 14h6.7"/></svg></span><span id="tlabel"></span></button><input type="hidden" id="evTime" value=""><input type="text" id="evText" placeholder="Neuer Termin" autocomplete="off"><button class="add" type="submit" aria-label="Termin hinzufügen"><svg viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="13.4" stroke-width="1"/><path d="M14 8.5v11M8.5 14h11"/></svg></button></form>
     <div class="pick" id="pick" hidden></div>
   </section>
 
   <section id="tasks">
     <h2>Aufgaben <span><span id="todoCount"></span><button id="clearDone" hidden>Erledigte entfernen</button></span></h2>
     <ul id="todoList"></ul>
-    <form id="todoForm"><input type="text" id="todoInput" placeholder="Neue Aufgabe" autocomplete="off"><button class="add" type="submit" aria-label="Aufgabe hinzufügen"><svg viewBox="0 0 28 28" aria-hidden="true"><path d="M14 8.5v11M8.5 14h11"/></svg></button></form>
+    <form id="todoForm"><input type="text" id="todoInput" placeholder="Neue Aufgabe" autocomplete="off"><button class="add" type="submit" aria-label="Aufgabe hinzufügen"><svg viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="13.4" stroke-width="1"/><path d="M14 8.5v11M8.5 14h11"/></svg></button></form>
     <div class="pick" id="tpick" hidden></div>
   </section>
 
   <section id="notesSec">
     <h2>Notizen</h2>
     <ul id="noteList"></ul>
-    <form id="noteForm"><input type="text" id="noteInput" placeholder="Neue Notiz" autocomplete="off"><button class="add" type="submit" aria-label="Notiz hinzufügen"><svg viewBox="0 0 28 28" aria-hidden="true"><path d="M14 8.5v11M8.5 14h11"/></svg></button></form>
+    <form id="noteForm"><input type="text" id="noteInput" placeholder="Neue Notiz" autocomplete="off"><button class="add" type="submit" aria-label="Notiz hinzufügen"><svg viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="13.4" stroke-width="1"/><path d="M14 8.5v11M8.5 14h11"/></svg></button></form>
   </section>
 
   <footer><button id="backup">Sichern</button><button id="theme"></button></footer>
