@@ -113,6 +113,10 @@ input::placeholder,textarea::placeholder{color:var(--soft)}
 .add{flex:none;width:28px;height:28px;border:1px solid var(--ink);border-radius:50%;background:none;font:300 18px/1 var(--body);cursor:pointer;padding:0}
 .tbox{flex:none;position:relative;display:flex;align-items:center;border:1px solid var(--line);border-radius:14px;padding:3px 10px;font-size:13px;color:var(--soft);white-space:nowrap;font-variant-numeric:tabular-nums;cursor:pointer}
 .clk{width:14px;height:14px;margin-right:6px;flex:none;fill:none;stroke:currentColor;stroke-width:1.25;stroke-linecap:round}
+.tbox:not(.set){width:28px;height:28px;padding:0;justify-content:center;border-radius:50%;box-sizing:border-box}
+.tbox:not(.set) .clk{margin:0}
+.tbox::after{content:"";position:absolute;inset:-8px}
+#tlabel:empty{display:none}
 .tbox.set{color:var(--ink);border-color:var(--ink)}
 .pick{flex:none;display:flex;align-items:center;gap:16px;padding:9px 0 2px;font-size:12px;color:var(--soft);letter-spacing:.04em}
 .pick span{flex:1}
@@ -146,7 +150,7 @@ footer button{background:none;border:0;padding:4px 0;cursor:pointer;font-size:10
   <section id="cal">
     <h2>Termine <span id="selLabel"></span></h2>
     <ul id="eventList"></ul>
-    <form id="eventForm"><button type="button" class="tbox" id="tbox"><svg class="clk" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.75"/><path d="M8 8V1.25M8 8h3.4"/></svg><span id="tlabel">Uhrzeit</span></button><input type="hidden" id="evTime" value=""><input type="text" id="evText" placeholder="Neuer Termin" autocomplete="off"><button class="add" type="submit" aria-label="Termin hinzufügen">+</button></form>
+    <form id="eventForm"><button type="button" class="tbox" id="tbox" aria-label="Uhrzeit wählen"><svg class="clk" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.75"/><path d="M8 8V1.25M8 8h3.4"/></svg><span id="tlabel"></span></button><input type="hidden" id="evTime" value=""><input type="text" id="evText" placeholder="Neuer Termin" autocomplete="off"><button class="add" type="submit" aria-label="Termin hinzufügen">+</button></form>
     <div class="pick" id="pick" hidden></div>
   </section>
 
@@ -282,7 +286,7 @@ $("eventList").addEventListener("click",e=>{const act=e.target.dataset.act,li=e.
   else if(act==="txt"){edit(e.target,o.t,v=>{if(v)o.t=v;renderEvents()})}});
 $("eventList").addEventListener("change",e=>{if(e.target.dataset.act!=="time")return;const o=refObj(e.target.closest("li").dataset.ref);if(o){o.h=e.target.value;renderEvents()}});
 wirePick("pick","evText","eventForm",(t,c)=>{const h=$("evTime").value;if(rep)rec.push({t,h,c,r:rep,start:sel});else(events[sel]=events[sel]||[]).push({h,t,c});$("evTime").value="";showTime();renderEvents()});
-function showTime(){const v=$("evTime").value;$("tlabel").textContent=v?v+" Uhr":"Uhrzeit";$("tbox").classList.toggle("set",!!v)}
+function showTime(){const v=$("evTime").value;$("tlabel").textContent=v?v+" Uhr":"";$("tbox").classList.toggle("set",!!v)}
 $("tbox").addEventListener("click",()=>openTime($("evTime").value,v=>{$("evTime").value=v;showTime()}));
 
 /* Uhrzeit-Blatt */
