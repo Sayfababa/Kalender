@@ -338,9 +338,10 @@ function setDue(o,n){if(n===""){delete o.due;delete o.at}else{o.due=addDays(toda
 function dueText(x){const n=diff(today,x.due);
   if(n<0)return "überfällig";if(n===0)return "heute";if(n===1)return "morgen";
   if(n<7)return new Date(x.due+"T12:00").toLocaleDateString("de-DE",{weekday:"short"}).replace(".","");
-  return new Date(x.due+"T12:00").toLocaleDateString("de-DE",{day:"numeric",month:"short"}).replace(".","")}
+  return new Date(x.due+"T12:00").toLocaleDateString("de-DE",{day:"numeric",month:"short"}).replace(/\.$/,"")}
 function dueHTML(x){if(!x.due)return "";const n=diff(today,x.due);return `<span class="due ${x.d?"":n<0?"late":n<=1?"soon":""}">${dueText(x)}</span>`}
-function lineHTML(x){if(!x.due)return `<span class="tl"></span>`;const tot=Math.max(1,diff(x.at||today,x.due)),p=Math.min(1,Math.max(0,diff(x.at||today,today)/tot));
+/* Linie zeigt, wie nah die Frist ist: 30 Tage oder mehr = fast leer, heute = voll */
+function lineHTML(x){if(!x.due)return `<span class="tl"></span>`;const p=Math.min(1,Math.max(0,1-diff(today,x.due)/30));
   const late=!x.d&&diff(today,x.due)<0;return `<span class="tl${late?" late":""}" style="--p:${late?100:Math.max(4,Math.round(p*100))}%;--f:${COL[x.c]||"var(--ink)"}"><i></i></span>`}
 
 /* Aufgaben-Blatt: Farbe und Frist nachträglich */
