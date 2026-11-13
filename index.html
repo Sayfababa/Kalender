@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -26,7 +26,7 @@ body{margin:0}
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;600&display=swap">
 <style>
-/* Layout: ein Bildschirm, eine Spalte – Datum, zwei Wochen (wischbar), Termine, Aufgaben, Notizen; nur Haarlinien, viel Luft */
+/* Layout: ein Bildschirm, eine Spalte – Datum, drei Wochen (wischbar), Termine, Aufgaben, Demnächst; nur Haarlinien, viel Luft */
 :root{
   --paper:#f8f7f3; --ink:#1a1917; --soft:#8a867c; --line:#dcd8ce; --accent:#8f1d16; --veil:rgba(26,25,23,.16);
   --body:"Inter",-apple-system,system-ui,sans-serif;
@@ -35,7 +35,7 @@ body{margin:0}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--paper:#171614;--ink:#ebe7dc;--soft:#8e897e;--line:#34322d;--accent:#d98078;--veil:rgba(0,0,0,.55);color-scheme:dark}}
 :root[data-theme="dark"]{--paper:#171614;--ink:#ebe7dc;--soft:#8e897e;--line:#34322d;--accent:#d98078;--veil:rgba(0,0,0,.55);color-scheme:dark}
 html,body{height:100%}
-body{background:var(--paper);color:var(--ink);font:300 16px/1.45 var(--body);box-sizing:border-box;overflow:hidden;
+body{background:var(--paper);color:var(--ink);font:300 15px/1.45 var(--body);box-sizing:border-box;overflow:hidden;
   padding-left:max(22px,env(safe-area-inset-left,0px));padding-right:max(22px,env(safe-area-inset-right,0px));padding-block:14px 10px}
 .page{height:100%;max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:clamp(14px,3.2vh,26px)}
 button{font-family:var(--body);color:var(--ink)}
@@ -58,14 +58,25 @@ header{flex:none;text-align:center}
 
 /* Bereiche */
 section{display:flex;flex-direction:column;min-height:0}
-#cal,#tasks,#notesSec{flex:0 1 auto}
+#cal,#tasks{flex:0 1 auto}
+/* Demnächst: nimmt den restlichen Platz, zeigt nur so viele Einträge wie ganz hineinpassen */
+#upSec{flex:1 1 0;min-height:0}
+#upSec[hidden]{display:none}
+#upList{overflow:hidden;position:relative;flex:1 1 auto}
+#upList li{border-bottom:1px solid var(--line);padding:7px 0;cursor:pointer}
+#upList li[hidden]{display:none}
+.udot{flex:none;width:7px;height:7px;border-radius:50%;box-sizing:border-box}
+.udot.ring{background:none!important;border:1px solid var(--rc)}
+.udate{flex:none;min-width:68px;font-size:13px;color:var(--soft);font-variant-numeric:tabular-nums;white-space:nowrap}
+#upList time{min-width:34px}
+#upList .txt{cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* Aufgaben: feine Linie darunter, mit Frist als Zeitstrahl */
 #todoList li{position:relative;padding:8px 0 9px}
 .tl{position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--line);pointer-events:none}
 .tl i{position:absolute;left:0;top:0;bottom:0;width:var(--p);background:var(--f,var(--ink));transition:width .4s}
 .tl.late i{background:var(--accent)}
 li.done .tl i{opacity:.25}
-.due{flex:none;font-size:12px;color:var(--soft);font-variant-numeric:tabular-nums;white-space:nowrap}
+.due{flex:none;font-size:13px;color:var(--soft);font-variant-numeric:tabular-nums;white-space:nowrap}
 .due.soon{color:var(--ink)}
 .due.late{color:var(--accent)}
 /* Aufgaben-Blatt: Farbe und Frist */
@@ -91,8 +102,6 @@ li .txt{flex:1;min-width:0;overflow-wrap:anywhere;cursor:text}
 li time{font-size:13px;color:var(--soft);min-width:38px;display:inline-block;font-variant-numeric:tabular-nums}
 li.done .txt{text-decoration:line-through;text-decoration-color:var(--soft);color:var(--soft)}
 #eventList li{border-bottom:1px solid var(--line);padding:7px 0}
-#noteList li{gap:10px;padding:4px 0}
-#noteList .dash{color:var(--soft);flex:none;margin-left:4px}
 
 /* kleine Bedienelemente mit unsichtbar vergrößerter Tippfläche */
 .x,.check,.grip,.rgrip,.cdot{position:relative;flex:none}
@@ -133,7 +142,7 @@ li.lift{opacity:.45}
 .tfoot .pill{background:none;border:1px solid var(--ink);border-radius:20px;padding:8px 22px;font:300 14px var(--body);cursor:pointer}
 
 /* Eingabezeilen */
-input[type=text],textarea{font:300 16px var(--body);color:var(--ink);background:transparent;border:0;outline:0}
+input[type=text],textarea{font:300 15px var(--body);color:var(--ink);background:transparent;border:0;outline:0}
 form{flex:none;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);padding:4px 0}
 #eventForm,#todoForm,#noteForm{border-bottom-color:var(--ink);margin-top:2px}
 ul:not(:empty)+form{margin-top:12px}
@@ -199,10 +208,9 @@ footer button{background:none;border:0;padding:4px 0;cursor:pointer;font-size:10
     <div class="pick" id="tpick" hidden></div>
   </section>
 
-  <section id="notesSec">
-    <h2>Notizen</h2>
-    <ul id="noteList"></ul>
-    <form id="noteForm"><input type="text" id="noteInput" placeholder="Neue Notiz" autocomplete="off"><button class="add" type="submit" aria-label="Notiz hinzufügen"><svg viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="13.4" stroke-width="1"/><path d="M14 8.5v11M8.5 14h11"/></svg></button></form>
+  <section id="upSec" hidden>
+    <h2>Demnächst <span id="upLabel"></span></h2>
+    <ul id="upList"></ul>
   </section>
 
   <footer><button id="backup">Sichern<span id="bkAge"></span></button><button id="undo" hidden>Rückgängig</button><button id="theme"></button></footer>
@@ -281,7 +289,27 @@ function renderWeek(){
   const m=d=>d.toLocaleDateString("de-DE",{month:"long"});
   $("wlabel").textContent=(m(start)===m(end)?m(start):m(start)+" – "+m(end))+" "+end.getFullYear();
   $("toToday").hidden=weekOffset===0;
+  renderUp(start,end);
 }
+/* Demnächst: kommende Termine und Fristen; im Kalender weitergewischt = die Einträge dieses Monats */
+let upFrom,upTo;
+function renderUp(start,end){const tm=addDays(today,1);let from,to,lab="";
+  if(weekOffset===0){from=tm;to=addDays(today,90)}
+  else{const mid=new Date(start);mid.setDate(mid.getDate()+10);const y=mid.getFullYear(),m=mid.getMonth();
+    from=key(new Date(y,m,1,12));to=key(new Date(y,m+1,0,12));if(from<tm&&to>=tm)from=tm;lab="im "+mid.toLocaleDateString("de-DE",{month:"long"})}
+  const items=[];for(let k=from;k<=to&&items.length<40;k=addDays(k,1)){
+    evsFor(k).sort((a,b)=>(a.h||"").localeCompare(b.h||"")).forEach(e=>items.push({k,h:e.h||"",t:e.t,c:e.c}));
+    todos.filter(t=>!t.d&&t.due===k).forEach(t=>items.push({k,h:"",t:t.t,c:t.c,task:1}))}
+  $("upLabel").textContent=lab;$("upSec").hidden=!items.length;
+  $("upList").innerHTML=items.map(x=>{const d=new Date(x.k+"T12:00");
+    return `<li data-k="${x.k}">${x.task?`<i class="udot ring" style="--rc:${colorOf(x.c)}"></i>`:`<i class="udot" style="background:${colorOf(x.c)}"></i>`}<span class="udate">${d.toLocaleDateString("de-DE",{weekday:"short"}).slice(0,2)} ${d.getDate()}. ${d.toLocaleDateString("de-DE",{month:"short"}).replace(".","")}</span><time>${esc(x.h)}</time><span class="txt">${esc(x.t)}</span></li>`}).join("");
+  requestAnimationFrame(trimUp)}
+/* nur ganze Zeilen zeigen, nichts scrollen */
+function trimUp(){const u=$("upList"),lis=[...u.children];lis.forEach(l=>l.hidden=false);const h=u.clientHeight;
+  let n=0;lis.forEach(l=>{l.hidden=l.offsetTop+l.offsetHeight>h+1;if(!l.hidden)n++});$("upSec").style.visibility=n?"":"hidden"}
+$("upList").addEventListener("click",e=>{const li=e.target.closest("li[data-k]");if(!li)return;sel=li.dataset.k;
+  if(!$("week").querySelector(`[data-k="${sel}"]`)){const mon=d=>{const x=new Date(d+"T12:00");x.setDate(x.getDate()-((x.getDay()+6)%7));return key(x)};weekOffset=Math.round(diff(mon(today),mon(sel))/7)}
+  closePick("pick");renderEvents()});
 let swipe=null,swiped=false;
 $("week").addEventListener("pointerdown",e=>{swipe={x:e.clientX,y:e.clientY}});
 $("week").addEventListener("pointerup",e=>{if(!swipe)return;const dx=e.clientX-swipe.x,dy=e.clientY-swipe.y;swipe=null;
@@ -405,16 +433,6 @@ $("dgrid").addEventListener("click",e=>{const k=e.target.dataset.dk;if(!k)return
 $("ook").addEventListener("click",()=>{$("osheet").hidden=true});
 $("osheet").addEventListener("click",e=>{if(e.target.id==="osheet")$("osheet").hidden=true});
 
-/* Notizen als Stichpunkte */
-function renderNotes(){
-  $("noteList").innerHTML=notes.length?notes.map((n,i)=>`<li data-idx="${i}"><span class="rgrip" aria-label="Ziehen, um die Reihenfolge zu ändern">⋮⋮</span><span class="dash">–</span><span class="txt" data-n="${i}">${esc(n)}</span><button class="x" data-nd="${i}" aria-label="Löschen"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1 1l8 8M9 1l-8 8"/></svg></button></li>`).join(""):"";
-  save("noteList",notes);
-}
-$("noteList").addEventListener("click",e=>{const d=e.target.dataset;
-  if(d.nd!==undefined){snap();notes.splice(+d.nd,1);renderNotes()}
-  else if(d.n!==undefined){const old=notes[+d.n];edit(e.target,old,v=>{const i=notes[+d.n]===old?+d.n:notes.indexOf(old);if(i>=0){if(v)notes[i]=v;else{snap();notes.splice(i,1)}}renderNotes()})}});
-$("noteForm").addEventListener("submit",e=>{e.preventDefault();const i=$("noteInput");if(i.value.trim()){notes.push(i.value.trim());i.value="";renderNotes()}});
-
 /* Reihenfolge von Aufgaben und Notizen per Griffpunkt ändern */
 let rdrag=null;
 function wireReorder(ulId,get,set,render){$(ulId).addEventListener("pointerdown",e=>{const g=e.target.closest(".rgrip");if(!g)return;e.preventDefault();
@@ -425,7 +443,6 @@ document.addEventListener("pointermove",e=>{if(!rdrag)return;const t=document.el
 function endReorder(){if(!rdrag)return;const {ul,get,set,render}=rdrag,a=get();rdrag=null;set([...ul.children].map(li=>a[+li.dataset.idx]));render()}
 document.addEventListener("pointerup",endReorder);document.addEventListener("pointercancel",endReorder);
 wireReorder("todoList",()=>todos,v=>todos=v,renderTodos);
-wireReorder("noteList",()=>notes,v=>notes=v,renderNotes);
 
 /* Darstellung: Auto / Hell / Dunkel */
 const root=document.documentElement,hostTheme=root.dataset.theme;
@@ -434,7 +451,7 @@ function applyTheme(){if(theme==="auto"){if(hostTheme)root.dataset.theme=hostThe
   $("theme").textContent={auto:"Automatisch",light:"Hell",dark:"Dunkel"}[theme]}
 $("theme").addEventListener("click",()=>{theme={auto:"light",light:"dark",dark:"auto"}[theme];save("theme",theme);applyTheme()});
 
-$("undo").addEventListener("click",()=>{if(!undoData)return;const d=JSON.parse(undoData);todos=d.todos;events=d.events;notes=d.notes;rec=d.rec;undoData=null;clearTimeout(undoT);$("undo").hidden=true;renderEvents();renderTodos();renderNotes()});
+$("undo").addEventListener("click",()=>{if(!undoData)return;const d=JSON.parse(undoData);todos=d.todos;events=d.events;notes=d.notes;rec=d.rec;undoData=null;clearTimeout(undoT);$("undo").hidden=true;renderEvents();renderTodos()});
 
 /* Sichern und Wiederherstellen */
 let armed=false;
@@ -451,7 +468,7 @@ $("sheetText").addEventListener("input",()=>{armed=false;$("sheetRestore").textC
 $("sheetRestore").addEventListener("click",()=>{let d;try{d=JSON.parse($("sheetText").value)}catch(_){}
   if(!d||!Array.isArray(d.todos)||!Array.isArray(d.notes)||typeof d.events!=="object"||!d.events||Array.isArray(d.events)){$("sheetMsg").textContent="Das ist keine gültige Sicherung. Bitte den gesicherten Text vollständig einfügen.";return}
   if(!armed){armed=true;$("sheetRestore").textContent="Wirklich ersetzen?";$("sheetMsg").textContent="Die jetzigen Einträge werden durch die Sicherung ersetzt.";return}
-  todos=d.todos;events=d.events;notes=d.notes;rec=Array.isArray(d.rec)?d.rec:[];renderEvents();renderTodos();renderNotes();$("sheet").hidden=true});
+  todos=d.todos;events=d.events;notes=d.notes;rec=Array.isArray(d.rec)?d.rec:[];save("noteList",notes);renderEvents();renderTodos();$("sheet").hidden=true});
 
 /* Tastatur: Aufbau bleibt unverändert, iOS schiebt nur das aktive Feld ins Bild; danach zurück an den Anfang */
 if(window.visualViewport){const vv=window.visualViewport;let wasOpen=false;vv.addEventListener("resize",()=>{
@@ -461,9 +478,9 @@ if(window.visualViewport){const vv=window.visualViewport;let wasOpen=false;vv.ad
 let zoomF=1;
 function fit(){zoomF=Math.min(1.1,Math.max(1,window.innerHeight/700));const p=$("page");
   p.style.transformOrigin="50% 0";p.style.transform=zoomF>1?`scale(${zoomF})`:"";p.style.width=(100/zoomF)+"%";p.style.height=(100/zoomF)+"%"}
-window.addEventListener("resize",()=>{if(!document.activeElement||document.activeElement.tagName!=="INPUT")fit()});fit();
+window.addEventListener("resize",()=>{if(!document.activeElement||document.activeElement.tagName!=="INPUT"){fit();trimUp()}});fit();
 
-applyTheme();tick();renderEvents();renderTodos();renderNotes();bkShow();
+applyTheme();tick();renderEvents();renderTodos();bkShow();
 </script>
 
 <style>
