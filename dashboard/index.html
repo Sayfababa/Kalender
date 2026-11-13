@@ -44,8 +44,10 @@ li{display:flex;align-items:baseline;gap:12px;padding:5px 0}
 li span{flex:1;min-width:0;overflow-wrap:anywhere}
 li time{font-size:13px;color:var(--soft);min-width:38px;font-variant-numeric:tabular-nums}
 li.done span{text-decoration:line-through;text-decoration-color:var(--soft);color:var(--soft)}
-.check{flex:none;width:15px;height:15px;border:1px solid var(--ink);border-radius:50%;background:none;padding:0;cursor:pointer;transform:translateY(2px)}
-li.done .check{background:var(--ink)}
+.etime{position:relative;flex:none;cursor:pointer}
+.etime input{position:absolute;inset:-6px;width:calc(100% + 12px);opacity:0;font-size:16px;border:0;padding:0;cursor:pointer}
+.check{flex:none;width:15px;height:15px;border:1.5px solid var(--c,var(--ink));border-radius:50%;background:none;padding:0;cursor:pointer;transform:translateY(2px)}
+li.done .check{background:var(--c,var(--ink))}
 .x{background:none;border:0;color:var(--soft);font-size:16px;padding:0 2px;cursor:pointer;opacity:.6}
 .empty{font-style:italic;color:var(--soft)}
 #eventList li{border-bottom:1px solid var(--line);padding:7px 0}
@@ -86,6 +88,7 @@ textarea{flex:1;min-height:0;resize:none;padding:4px 0;line-height:1.5;
     <h2>Aufgaben <span id="todoCount"></span></h2>
     <ul id="todoList"></ul>
     <form id="todoForm"><input type="text" id="todoInput" placeholder="Neue Aufgabe" autocomplete="off"><button class="add" type="submit" aria-label="Aufgabe hinzufügen">+</button></form>
+    <div class="pick" id="tpick" hidden><span>Farbe wählen</span><button data-c="rot" style="background:#c4453a" aria-label="Rot"></button><button data-c="blau" style="background:#3b6cb4" aria-label="Blau"></button><button data-c="gruen" style="background:#4a8a5a" aria-label="Grün"></button><button data-c="gelb" style="background:#d9a926" aria-label="Gelb"></button></div>
   </section>
 
   <section id="notesSec">
@@ -120,11 +123,11 @@ function renderWeek(){
 function renderEvents(){
   $("selLabel").textContent=sel===today?"heute":new Date(sel+"T12:00").toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"});
   const ev=(events[sel]||[]).map((x,i)=>({...x,i})).sort((a,b)=>a.h.localeCompare(b.h));
-  $("eventList").innerHTML=ev.length?ev.map(x=>`<li><span class="grip" data-g="${x.i}" aria-label="Ziehen, um Termin zu verschieben">⋮⋮</span><time>${esc(x.h||"—")}</time><i class="cdot" style="background:${COL[x.c]||"var(--accent)"}"></i><span>${esc(x.t)}</span><button class="x" data-e="${x.i}" aria-label="Löschen">×</button></li>`).join(""):`<li class="empty">Keine Termine</li>`;
+  $("eventList").innerHTML=ev.length?ev.map(x=>`<li><span class="grip" data-g="${x.i}" aria-label="Ziehen, um Termin zu verschieben">⋮⋮</span><label class="etime"><time>${esc(x.h||"—")}</time><input type="time" data-ti="${x.i}" value="${esc(x.h)}" aria-label="Uhrzeit ändern"></label><i class="cdot" style="background:${COL[x.c]||"var(--accent)"}"></i><span>${esc(x.t)}</span><button class="x" data-e="${x.i}" aria-label="Löschen">×</button></li>`).join(""):`<li class="empty">Keine Termine</li>`;
   save("events",events);renderWeek();
 }
 function renderTodos(){
-  $("todoList").innerHTML=todos.length?todos.map((x,i)=>`<li class="${x.d?"done":""}"><button class="check" data-i="${i}" aria-label="${x.d?"Wieder öffnen":"Erledigt"}"></button><span>${esc(x.t)}</span><button class="x" data-del="${i}" aria-label="Löschen">×</button></li>`).join(""):`<li class="empty">Alles erledigt</li>`;
+  $("todoList").innerHTML=todos.length?todos.map((x,i)=>`<li class="${x.d?"done":""}"><button class="check" style="--c:${COL[x.c]||"var(--ink)"}" data-i="${i}" aria-label="${x.d?"Wieder öffnen":"Erledigt"}"></button><span>${esc(x.t)}</span><button class="x" data-del="${i}" aria-label="Löschen">×</button></li>`).join(""):`<li class="empty">Alles erledigt</li>`;
   $("todoCount").textContent=`${todos.filter(x=>!x.d).length} offen`;
   save("todos",todos);
 }
@@ -139,7 +142,9 @@ $("todoList").addEventListener("click",e=>{
   if(e.target.dataset.del!==undefined){todos.splice(+e.target.dataset.del,1);renderTodos()}
   else if(e.target.dataset.i!==undefined){const x=todos[+e.target.dataset.i];x.d=!x.d;renderTodos()}
 });
-$("todoForm").addEventListener("submit",e=>{e.preventDefault();const i=$("todoInput");if(i.value.trim()){todos.unshift({t:i.value.trim(),d:false});i.value="";renderTodos()}});
+$("todoForm").addEventListener("submit",e=>{e.preventDefault();if($("todoInput").value.trim())$("tpick").hidden=false;else $("todoInput").focus()});
+$("tpick").addEventListener("click",e=>{const c=e.target.dataset.c;if(!c)return;const i=$("todoInput");todos.unshift({t:i.value.trim(),d:false,c});i.value="";$("tpick").hidden=true;renderTodos()});
+$("eventList").addEventListener("change",e=>{const i=e.target.dataset.ti;if(i!==undefined&&events[sel]?.[+i]){events[sel][+i].h=e.target.value;renderEvents()}});
 /* Termine per Ziehen auf einen Tag verschieben (Touch + Maus) */
 let drag=null;
 const overDay=(x,y)=>document.elementFromPoint(x,y)?.closest(".week button");
