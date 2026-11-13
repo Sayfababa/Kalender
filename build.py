@@ -58,6 +58,11 @@ body>footer.app-foot{position:fixed;left:0;right:0;bottom:0;margin:0;z-index:5;d
   /* Manche iOS-Versionen lassen den sichtbaren Bereich der Home-Bildschirm-App über dem unteren Rand enden: Lücke ausgleichen */
   function low(){var g=0;if(navigator.standalone&&window.innerHeight>window.innerWidth){g=Math.max(0,(screen.height||0)-window.innerHeight);if(g>160)g=0}
     f.style.transform=g?"translateY("+g+"px)":""}
+  /* Vorübergehende Messwerte zur Fehlersuche (unten in der Mitte) */
+  var dbg=document.createElement("span");dbg.style.cssText="font-size:9px;letter-spacing:0;color:var(--soft);text-transform:none";
+  var pr=document.createElement("div");pr.style.cssText="position:fixed;bottom:0;left:0;width:1px;height:0;padding-bottom:env(safe-area-inset-bottom,0px);padding-top:env(safe-area-inset-top,0px);visibility:hidden";document.body.appendChild(pr);
+  function dshow(){var cs=getComputedStyle(pr);dbg.textContent="ih"+window.innerHeight+" sh"+screen.height+" vv"+Math.round(window.visualViewport?visualViewport.height:0)+" ch"+document.documentElement.clientHeight+" sb"+parseInt(cs.paddingBottom)+" st"+parseInt(cs.paddingTop)+" sa"+(navigator.standalone?1:0)+" fb"+Math.round(f.getBoundingClientRect().bottom)}
+  f.insertBefore(dbg,f.lastElementChild);setTimeout(dshow,500);window.addEventListener("resize",dshow);
   low();window.addEventListener("resize",low);window.addEventListener("orientationchange",function(){setTimeout(low,300)})})();
 if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(function(){})}
 </script>
