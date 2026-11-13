@@ -69,7 +69,7 @@ li time{font-size:13px;color:var(--soft);min-width:38px;display:inline-block;fon
 li.done .txt{text-decoration:line-through;text-decoration-color:var(--soft);color:var(--soft)}
 #eventList li{border-bottom:1px solid var(--line);padding:7px 0}
 #noteList li{gap:10px;padding:4px 0}
-#noteList .dash{color:var(--soft);flex:none;margin-left:-2px}
+#noteList .dash{color:var(--soft);flex:none;margin-left:4px}
 
 /* kleine Bedienelemente mit unsichtbar vergrößerter Tippfläche */
 .x,.check,.grip,.rgrip,.cdot{position:relative;flex:none}
@@ -425,8 +425,14 @@ $("sheetRestore").addEventListener("click",()=>{let d;try{d=JSON.parse($("sheetT
 
 /* Tastatur: Seite auf den sichtbaren Bereich verkleinern, damit das aktive Feld nicht verdeckt wird */
 if(window.visualViewport){const vv=window.visualViewport;vv.addEventListener("resize",()=>{
-  const open=vv.height<window.innerHeight-100;$("page").style.height=open?(vv.height-24)+"px":"";
+  const open=vv.height<window.innerHeight-100;if(open)$("page").style.height=((vv.height-24)/zoomF)+"px";else fit();
   if(open){window.scrollTo(0,0);document.activeElement?.scrollIntoView?.({block:"nearest"})}})}
+
+/* Auf hohen Bildschirmen alles bis zu 10 % größer, damit unten kein Platz verschenkt wird */
+let zoomF=1;
+function fit(){zoomF=Math.min(1.1,Math.max(1,window.innerHeight/700));const p=$("page");
+  p.style.transformOrigin="50% 0";p.style.transform=zoomF>1?`scale(${zoomF})`:"";p.style.width=(100/zoomF)+"%";p.style.height=(100/zoomF)+"%"}
+window.addEventListener("resize",()=>{if(!document.activeElement||document.activeElement.tagName!=="INPUT")fit()});fit();
 
 applyTheme();tick();renderEvents();renderTodos();renderNotes();
 </script>
