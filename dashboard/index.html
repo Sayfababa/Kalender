@@ -110,14 +110,13 @@ form{flex:none;display:flex;align-items:center;gap:10px;border-bottom:1px solid 
 form input{flex:1;min-width:0;padding:2px 0}
 input::placeholder,textarea::placeholder{color:var(--soft)}
 .inl{flex:1;min-width:0;padding:0;border-bottom:1px solid var(--ink)!important}
-.add{flex:none;width:28px;height:28px;border:1px solid var(--ink);border-radius:50%;background:none;font:300 18px/1 var(--body);cursor:pointer;padding:0}
-.tbox{flex:none;position:relative;display:flex;align-items:center;border:1px solid var(--line);border-radius:14px;padding:3px 10px;font-size:13px;color:var(--soft);white-space:nowrap;font-variant-numeric:tabular-nums;cursor:pointer}
-.clk{width:14px;height:14px;margin-right:6px;flex:none;fill:none;stroke:currentColor;stroke-width:1.25;stroke-linecap:round}
-.tbox:not(.set){width:28px;height:28px;padding:0;justify-content:center;border-radius:50%;box-sizing:border-box}
-.tbox:not(.set) .clk{margin:0}
+.add,.clkbtn{flex:none;position:relative;width:28px;height:28px;border:1px solid var(--ink);border-radius:50%;background:none;cursor:pointer;padding:0;display:grid;place-items:center;box-sizing:border-box}
+.add svg,.clkbtn svg{width:28px;height:28px;fill:none;stroke:var(--ink);stroke-width:1.2;stroke-linecap:round;display:block}
+.add::after{content:"";position:absolute;inset:-8px}
+.tbox{flex:none;position:relative;display:flex;align-items:center;gap:8px;background:none;border:0;padding:0;font:300 13px var(--body);color:var(--ink);white-space:nowrap;font-variant-numeric:tabular-nums;cursor:pointer}
 .tbox::after{content:"";position:absolute;inset:-8px}
 #tlabel:empty{display:none}
-.tbox.set{color:var(--ink);border-color:var(--ink)}
+
 .pick{flex:none;display:flex;align-items:center;gap:16px;padding:9px 0 2px;font-size:12px;color:var(--soft);letter-spacing:.04em}
 .pick span{flex:1}
 .pick button[data-c]{position:relative;width:20px;height:20px;border-radius:50%;border:1px solid transparent;padding:0;cursor:pointer;background:none}
@@ -150,21 +149,21 @@ footer button{background:none;border:0;padding:4px 0;cursor:pointer;font-size:10
   <section id="cal">
     <h2>Termine <span id="selLabel"></span></h2>
     <ul id="eventList"></ul>
-    <form id="eventForm"><button type="button" class="tbox" id="tbox" aria-label="Uhrzeit wählen"><svg class="clk" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.75"/><path d="M8 8V1.25M8 8h3.4"/></svg><span id="tlabel"></span></button><input type="hidden" id="evTime" value=""><input type="text" id="evText" placeholder="Neuer Termin" autocomplete="off"><button class="add" type="submit" aria-label="Termin hinzufügen">+</button></form>
+    <form id="eventForm"><button type="button" class="tbox" id="tbox" aria-label="Uhrzeit wählen"><span class="clkbtn"><svg viewBox="0 0 28 28" aria-hidden="true"><path d="M14 14V1M14 14h6.5"/></svg></span><span id="tlabel"></span></button><input type="hidden" id="evTime" value=""><input type="text" id="evText" placeholder="Neuer Termin" autocomplete="off"><button class="add" type="submit" aria-label="Termin hinzufügen"><svg viewBox="0 0 28 28" aria-hidden="true"><path d="M14 8.5v11M8.5 14h11"/></svg></button></form>
     <div class="pick" id="pick" hidden></div>
   </section>
 
   <section id="tasks">
     <h2>Aufgaben <span><span id="todoCount"></span><button id="clearDone" hidden>Erledigte entfernen</button></span></h2>
     <ul id="todoList"></ul>
-    <form id="todoForm"><input type="text" id="todoInput" placeholder="Neue Aufgabe" autocomplete="off"><button class="add" type="submit" aria-label="Aufgabe hinzufügen">+</button></form>
+    <form id="todoForm"><input type="text" id="todoInput" placeholder="Neue Aufgabe" autocomplete="off"><button class="add" type="submit" aria-label="Aufgabe hinzufügen"><svg viewBox="0 0 28 28" aria-hidden="true"><path d="M14 8.5v11M8.5 14h11"/></svg></button></form>
     <div class="pick" id="tpick" hidden></div>
   </section>
 
   <section id="notesSec">
     <h2>Notizen</h2>
     <ul id="noteList"></ul>
-    <form id="noteForm"><input type="text" id="noteInput" placeholder="Neue Notiz" autocomplete="off"><button class="add" type="submit" aria-label="Notiz hinzufügen">+</button></form>
+    <form id="noteForm"><input type="text" id="noteInput" placeholder="Neue Notiz" autocomplete="off"><button class="add" type="submit" aria-label="Notiz hinzufügen"><svg viewBox="0 0 28 28" aria-hidden="true"><path d="M14 8.5v11M8.5 14h11"/></svg></button></form>
   </section>
 
   <footer><button id="backup">Sichern</button><button id="theme"></button></footer>
