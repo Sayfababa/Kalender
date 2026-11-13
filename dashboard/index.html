@@ -44,6 +44,9 @@ form{display:flex;gap:8px;flex:none;margin-top:6px}
 input[type=text]{flex:1;min-width:0;font:16px var(--body);color:var(--ink);background:transparent;border:0;border-bottom:1px solid var(--ink-soft);padding:5px 2px}
 input:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset:2px}
 form button{font:700 12px var(--head);text-transform:uppercase;letter-spacing:.1em;background:var(--ink);color:var(--paper);border:0;padding:6px 12px;cursor:pointer}
+.bar{flex:none;height:9px;border:1px solid var(--rule);margin:2px 0 4px;position:relative}
+.bar i{position:absolute;inset:0 auto 0 0;width:0;background:repeating-linear-gradient(-45deg,var(--ink) 0 1.5px,transparent 1.5px 4px);transition:width .4s}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
 .x{background:none;border:0;color:var(--ink-soft);font-size:18px;padding:0 4px;cursor:pointer}
 </style>
 
@@ -63,6 +66,7 @@ form button{font:700 12px var(--head);text-transform:uppercase;letter-spacing:.1
 
   <section id="tasks">
     <p class="kicker">Aufgaben <span id="todoCount"></span></p>
+    <div class="bar" role="progressbar" aria-label="Erledigte Aufgaben" id="bar"><i id="barFill"></i></div>
     <ul id="todoList"></ul>
     <form id="todoForm"><input type="text" id="todoInput" placeholder="Neue Aufgabe …" autocomplete="off"><button>+</button></form>
   </section>
@@ -98,7 +102,9 @@ function renderEvents(){
 }
 function renderTodos(){
   $("todoList").innerHTML=todos.length?todos.map((x,i)=>`<li class="${x.d?"done":""}"><input type="checkbox" id="td${i}" ${x.d?"checked":""} data-i="${i}"><span>${esc(x.t)}</span><button class="x" data-del="${i}" aria-label="Löschen">×</button></li>`).join(""):`<li class="empty">Alles erledigt.</li>`;
-  const open=todos.filter(x=>!x.d).length;$("todoCount").textContent=`${open} offen`;
+  const done=todos.filter(x=>x.d).length,p=todos.length?Math.round(done/todos.length*100):0;
+  $("todoCount").textContent=`${done} von ${todos.length} erledigt · ${p} %`;
+  $("barFill").style.width=p+"%";$("bar").setAttribute("aria-valuenow",p);
   save("todos",todos);
 }
 $("week").addEventListener("click",e=>{const b=e.target.closest("button");if(b){sel=b.dataset.k;renderEvents()}});
