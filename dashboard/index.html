@@ -44,6 +44,13 @@ li.done span{text-decoration:line-through;text-decoration-color:var(--soft);colo
 li.done .check{background:var(--ink)}
 .x{background:none;border:0;color:var(--soft);font-size:16px;padding:0 2px;cursor:pointer;opacity:.6}
 .empty{font-style:italic;color:var(--soft)}
+#eventList li{border-bottom:1px solid var(--line);padding:7px 0}
+#eventForm{border-bottom:1px solid var(--ink);margin-top:2px}
+.cdot{flex:none;width:7px;height:7px;border-radius:50%;transform:translateY(-1px)}
+.week .has::after{background:var(--dot)!important}
+.pick{flex:none;display:flex;align-items:center;gap:14px;padding:8px 0 2px;font-size:12px;color:var(--soft);letter-spacing:.04em}
+.pick span{flex:1}
+.pick button{width:22px;height:22px;border-radius:50%;border:0;padding:0;cursor:pointer;box-shadow:0 0 0 2px var(--paper),0 0 0 3px var(--line)}
 .tbox{flex:none;position:relative;display:flex;align-items:center;border:1px solid var(--line);border-radius:14px;padding:3px 10px;font-size:13px;color:var(--soft);white-space:nowrap;font-variant-numeric:tabular-nums;cursor:pointer}
 .tbox.set{color:var(--ink);border-color:var(--ink)}
 .tbox input{position:absolute;inset:0;width:100%;height:100%;opacity:0;border:0;padding:0;margin:0;cursor:pointer;font-size:16px}
@@ -68,6 +75,7 @@ textarea{flex:1;min-height:0;resize:none;padding:4px 0;line-height:1.5;
     <h2>Termine <span id="selLabel"></span></h2>
     <ul id="eventList"></ul>
     <form id="eventForm"><label class="tbox" id="tbox"><span id="tlabel">Uhrzeit</span><input type="time" id="evTime" aria-label="Uhrzeit wählen"></label><input type="text" id="evText" placeholder="Neuer Termin" autocomplete="off"><button class="add" type="submit" aria-label="Termin hinzufügen">+</button></form>
+    <div class="pick" id="pick" hidden><span>Farbe wählen</span><button data-c="rot" style="background:#c4453a" aria-label="Rot"></button><button data-c="blau" style="background:#3b6cb4" aria-label="Blau"></button><button data-c="gruen" style="background:#4a8a5a" aria-label="Grün"></button><button data-c="gelb" style="background:#d9a926" aria-label="Gelb"></button></div>
   </section>
 
   <section id="tasks">
@@ -89,6 +97,7 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",
 const key=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 const $=id=>document.getElementById(id);
 const now=new Date(), today=key(now);
+const COL={rot:"#c4453a",blau:"#3b6cb4",gruen:"#4a8a5a",gelb:"#d9a926"};
 
 let todos=load("todos",[{t:"Beispiel: Zahnarzt anrufen",d:false},{t:"Beispiel: Wocheneinkauf",d:true}]);
 let events=load("events",{[today]:[{h:"18:30",t:"Beispiel: Abendessen mit Freunden"}]});
@@ -100,13 +109,13 @@ tick();setInterval(tick,15000);
 function renderWeek(){
   const start=new Date(now);start.setDate(now.getDate()-((now.getDay()+6)%7));
   let h="";for(let i=0;i<14;i++){const d=new Date(start);d.setDate(start.getDate()+i);const k=key(d);
-    h+=`<button class="${k===today?"today ":""}${k===sel?"sel ":""}${(events[k]||[]).length?"has":""}" data-k="${k}">${i<7?`<small>${d.toLocaleDateString("de-DE",{weekday:"short"}).slice(0,2)}</small>`:""}${d.getDate()}</button>`}
+    h+=`<button class="${k===today?"today ":""}${k===sel?"sel ":""}${(events[k]||[]).length?"has":""}" style="--dot:${COL[(events[k]||[])[0]?.c]||"var(--accent)"}" data-k="${k}">${i<7?`<small>${d.toLocaleDateString("de-DE",{weekday:"short"}).slice(0,2)}</small>`:""}${d.getDate()}</button>`}
   $("week").innerHTML=h;
 }
 function renderEvents(){
   $("selLabel").textContent=sel===today?"heute":new Date(sel+"T12:00").toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"});
   const ev=(events[sel]||[]).map((x,i)=>({...x,i})).sort((a,b)=>a.h.localeCompare(b.h));
-  $("eventList").innerHTML=ev.length?ev.map(x=>`<li><span class="grip" data-g="${x.i}" aria-label="Ziehen, um Termin zu verschieben">⋮⋮</span><time>${esc(x.h||"—")}</time><span>${esc(x.t)}</span><button class="x" data-e="${x.i}" aria-label="Löschen">×</button></li>`).join(""):`<li class="empty">Keine Termine</li>`;
+  $("eventList").innerHTML=ev.length?ev.map(x=>`<li><span class="grip" data-g="${x.i}" aria-label="Ziehen, um Termin zu verschieben">⋮⋮</span><time>${esc(x.h||"—")}</time><i class="cdot" style="background:${COL[x.c]||"var(--accent)"}"></i><span>${esc(x.t)}</span><button class="x" data-e="${x.i}" aria-label="Löschen">×</button></li>`).join(""):`<li class="empty">Keine Termine</li>`;
   save("events",events);renderWeek();
 }
 function renderTodos(){
@@ -114,9 +123,11 @@ function renderTodos(){
   $("todoCount").textContent=`${todos.filter(x=>!x.d).length} offen`;
   save("todos",todos);
 }
-$("week").addEventListener("click",e=>{const b=e.target.closest("button");if(b){sel=b.dataset.k;renderEvents();$("evText").focus()}});
+$("week").addEventListener("click",e=>{const b=e.target.closest("button");if(b){sel=b.dataset.k;renderEvents()}});
 $("eventList").addEventListener("click",e=>{const i=e.target.dataset.e;if(i!==undefined){events[sel].splice(+i,1);if(!events[sel].length)delete events[sel];renderEvents()}});
-$("eventForm").addEventListener("submit",e=>{e.preventDefault();const tx=$("evText"),tm=$("evTime");if(tx.value.trim()){(events[sel]=events[sel]||[]).push({h:tm.value.trim(),t:tx.value.trim()});tx.value="";tm.value="";showTime();renderEvents()}});
+$("eventForm").addEventListener("submit",e=>{e.preventDefault();if($("evText").value.trim())$("pick").hidden=false;else $("evText").focus()});
+$("pick").addEventListener("click",e=>{const c=e.target.dataset.c;if(!c)return;const tx=$("evText"),tm=$("evTime");
+  (events[sel]=events[sel]||[]).push({h:tm.value.trim(),t:tx.value.trim(),c});tx.value="";tm.value="";showTime();$("pick").hidden=true;renderEvents()});
 function showTime(){const v=$("evTime").value;$("tlabel").textContent=v?v+" Uhr":"Uhrzeit";$("tbox").classList.toggle("set",!!v)}
 $("evTime").addEventListener("input",showTime);$("evTime").addEventListener("change",showTime);
 $("todoList").addEventListener("click",e=>{
