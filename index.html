@@ -452,10 +452,9 @@ $("sheetRestore").addEventListener("click",()=>{let d;try{d=JSON.parse($("sheetT
   if(!armed){armed=true;$("sheetRestore").textContent="Wirklich ersetzen?";$("sheetMsg").textContent="Die jetzigen Einträge werden durch die Sicherung ersetzt.";return}
   todos=d.todos;events=d.events;notes=d.notes;rec=Array.isArray(d.rec)?d.rec:[];renderEvents();renderTodos();renderNotes();$("sheet").hidden=true});
 
-/* Tastatur: Seite auf den sichtbaren Bereich verkleinern, damit das aktive Feld nicht verdeckt wird */
-if(window.visualViewport){const vv=window.visualViewport;vv.addEventListener("resize",()=>{
-  const open=vv.height<window.innerHeight-100;if(open)$("page").style.height=((vv.height-24)/zoomF)+"px";else fit();
-  if(open){window.scrollTo(0,0);document.activeElement?.scrollIntoView?.({block:"nearest"})}})}
+/* Tastatur: Aufbau bleibt unverändert, iOS schiebt nur das aktive Feld ins Bild; danach zurück an den Anfang */
+if(window.visualViewport){const vv=window.visualViewport;let wasOpen=false;vv.addEventListener("resize",()=>{
+  const open=vv.height<window.innerHeight-100;if(wasOpen&&!open){window.scrollTo(0,0);fit()}wasOpen=open})}
 
 /* Auf hohen Bildschirmen alles bis zu 10 % größer, damit unten kein Platz verschenkt wird */
 let zoomF=1;
