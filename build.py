@@ -52,17 +52,14 @@ body{-webkit-tap-highlight-color:transparent;
 /* Sichern / Hell ganz unten in den Ecken, neben der Home-Leiste */
 body>footer.app-foot{position:fixed;left:0;right:0;bottom:0;margin:0;z-index:5;display:flex;justify-content:space-between;
   padding:0 max(22px,env(safe-area-inset-right,0px)) max(6px,calc(env(safe-area-inset-bottom,0px) - 20px)) max(22px,env(safe-area-inset-left,0px))}
+html.short body>footer.app-foot{padding-bottom:2px}
+html.short body{padding-bottom:24px!important}
 </style>
 <script>
 (function(){var f=document.querySelector(".page>footer");if(!f)return;f.classList.add("app-foot");document.body.appendChild(f);
-  /* Manche iOS-Versionen lassen den sichtbaren Bereich der Home-Bildschirm-App über dem unteren Rand enden: Lücke ausgleichen */
-  function low(){var g=0;if(navigator.standalone&&window.innerHeight>window.innerWidth){g=Math.max(0,(screen.height||0)-window.innerHeight);if(g>160)g=0}
-    f.style.transform=""}
-  /* Vorübergehende Messwerte zur Fehlersuche (unten in der Mitte) */
-  var dbg=document.createElement("span");dbg.style.cssText="font-size:9px;letter-spacing:0;color:var(--soft);text-transform:none";
-  var pr=document.createElement("div");pr.style.cssText="position:fixed;bottom:0;left:0;width:1px;height:0;padding-bottom:env(safe-area-inset-bottom,0px);padding-top:env(safe-area-inset-top,0px);visibility:hidden";document.body.appendChild(pr);
-  function dshow(){var cs=getComputedStyle(pr);dbg.textContent="ih"+window.innerHeight+" sh"+screen.height+" vv"+Math.round(window.visualViewport?visualViewport.height:0)+" ch"+document.documentElement.clientHeight+" sb"+parseInt(cs.paddingBottom)+" st"+parseInt(cs.paddingTop)+" sa"+(navigator.standalone?1:0)+" fb"+Math.round(f.getBoundingClientRect().bottom)}
-  dbg.style.cssText+=";position:fixed;top:calc(env(safe-area-inset-top,0px) + 4px);left:0;right:0;text-align:center;z-index:9";document.body.appendChild(dbg);setTimeout(dshow,500);window.addEventListener("resize",dshow);
+  /* iOS 26: Die Home-Bildschirm-App endet unten ca. 59 Punkte über dem Rand und kann dort nichts zeichnen.
+     Dann die Fußzeile so tief wie möglich an den unteren Rand dieses Bereichs setzen. */
+  function low(){var g=(screen.height||0)-window.innerHeight;document.documentElement.classList.toggle("short",!!navigator.standalone&&window.innerHeight>window.innerWidth&&g>=20&&g<160)}
   low();window.addEventListener("resize",low);window.addEventListener("orientationchange",function(){setTimeout(low,300)})})();
 if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(function(){})}
 </script>
