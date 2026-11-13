@@ -3,10 +3,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;600&display=swap">
 <style>
-/* Layout: ein Bildschirm, eine Spalte – Titel, Woche, Termine, Aufgaben, Notizen; nur Haarlinien, viel Luft */
+/* Layout: ein Bildschirm, eine Spalte – Datum, zwei Wochen (wischbar), Termine, Aufgaben, Notizen; nur Haarlinien, viel Luft */
 :root{
   --paper:#f8f7f3; --ink:#1a1917; --soft:#8a867c; --line:#dcd8ce; --accent:#8f1d16;
-  --display:"Inter",-apple-system,system-ui,sans-serif;
   --body:"Inter",-apple-system,system-ui,sans-serif;
   color-scheme:light;
 }
@@ -14,84 +13,107 @@
 :root[data-theme="dark"]{--paper:#171614;--ink:#ebe7dc;--soft:#8e897e;--line:#34322d;--accent:#d98078;color-scheme:dark}
 html,body{height:100%}
 body{background:var(--paper);color:var(--ink);font:300 16px/1.45 var(--body);box-sizing:border-box;overflow:hidden;
-  padding-left:max(22px,env(safe-area-inset-left,0px));padding-right:max(22px,env(safe-area-inset-right,0px));padding-block:14px 14px}
-.page{height:100%;max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:26px}
+  padding-left:max(22px,env(safe-area-inset-left,0px));padding-right:max(22px,env(safe-area-inset-right,0px));padding-block:14px 10px}
+.page{height:100%;max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:clamp(14px,3.2vh,26px)}
+button{font-family:var(--body);color:var(--ink)}
 header{flex:none;text-align:center}
-.date{font-size:12px;font-weight:300;letter-spacing:.18em;text-transform:uppercase;color:var(--soft);font-variant-numeric:tabular-nums}
-.week{flex:none;display:grid;grid-template-columns:repeat(7,1fr);text-align:center;border-block:1px solid var(--line);padding-block:6px}
-.week{row-gap:4px}
-.week button{background:none;border:0;border-radius:10px;color:var(--ink);padding:11px 0;cursor:pointer;font:300 18px var(--body);transition:background .15s;font-variant-numeric:tabular-nums;position:relative}
-.week .over{background:var(--line);outline:1px solid var(--accent)}
-.grip{flex:none;touch-action:none;cursor:grab;color:var(--soft);padding:0 6px 0 0;user-select:none;-webkit-user-select:none;font-size:14px;letter-spacing:-2px}
-.ghost{position:fixed;z-index:50;pointer-events:none;transform:translate(-50%,-120%);background:var(--paper);border:1px solid var(--ink);border-radius:8px;padding:6px 12px;font-size:14px;max-width:70vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 6px 20px rgba(0,0,0,.18)}
+.date,.wlabel,footer button{font-size:11px;font-weight:300;letter-spacing:.18em;text-transform:uppercase;color:var(--soft);font-variant-numeric:tabular-nums}
+
+/* Kalender */
+.weekbox{flex:none}
+.wlabel{display:flex;justify-content:space-between;align-items:baseline;padding-bottom:6px}
+.wlabel button{background:none;border:0;padding:0;font:inherit;letter-spacing:inherit;text-transform:inherit;color:var(--accent);cursor:pointer}
+.week{display:grid;grid-template-columns:repeat(7,1fr);row-gap:4px;text-align:center;border-block:1px solid var(--line);padding-block:6px;touch-action:pan-y}
+.week button{background:none;border:0;border-radius:10px;padding:clamp(6px,1.3vh,11px) 0 11px;cursor:pointer;font:300 18px var(--body);transition:background .15s;font-variant-numeric:tabular-nums;position:relative;touch-action:pan-y}
 .week small{display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--soft)}
 .week .today{color:var(--accent)}
-.week .sel{font-weight:300}
-.week .sel::before{content:"";position:absolute;left:30%;right:30%;bottom:7px;border-bottom:1px solid var(--ink)}
-.week .has::after{content:"";position:absolute;left:50%;bottom:1px;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--accent)}
-section{display:flex;flex-direction:column;min-height:0}
-#cal{flex:0 1 auto;max-height:28%}
-#tasks{flex:0 1 auto}
-#notesSec{flex:0 1 auto;max-height:24%}
-#noteList li{gap:10px;padding:4px 0}
-#noteList li::before{content:"–";color:var(--soft);flex:none}
-#noteList span{cursor:text}
-#noteList input{flex:1;min-width:0;padding:0;border-bottom:1px solid var(--ink)}
-h2{flex:none;display:flex;justify-content:space-between;align-items:baseline;margin:0 0 4px;font:600 12px var(--display);letter-spacing:.16em;text-transform:uppercase}
-h2 span{font:300 12px var(--body);letter-spacing:.04em;text-transform:none;color:var(--soft)}
-ul{list-style:none;margin:0;padding:0;overflow-y:auto;min-height:0;flex:1 1 auto}
-li{display:flex;align-items:baseline;gap:12px;padding:5px 0}
-li span{flex:1;min-width:0;overflow-wrap:anywhere}
-li time{font-size:13px;color:var(--soft);min-width:38px;font-variant-numeric:tabular-nums}
-li.done span{text-decoration:line-through;text-decoration-color:var(--soft);color:var(--soft)}
-.etime{position:relative;flex:none;cursor:pointer}
-.etime select{-webkit-appearance:none;appearance:none;position:absolute;inset:-6px;width:calc(100% + 12px);opacity:0;font-size:16px;border:0;padding:0;cursor:pointer}
-.check{flex:none;width:15px;height:15px;border:1.5px solid var(--c,var(--ink));border-radius:50%;background:none;padding:0;cursor:pointer;transform:translateY(2px)}
-li.done .check{background:var(--c,var(--ink))}
-.x{background:none;border:0;color:var(--soft);font-size:16px;padding:0 2px;cursor:pointer;opacity:.6}
-.empty{font-style:italic;color:var(--soft)}
-#eventList li{border-bottom:1px solid var(--line);padding:7px 0}
-#eventForm{border-bottom:1px solid var(--ink);margin-top:2px}
-.cdot{flex:none;width:7px;height:7px;border-radius:50%;transform:translateY(-1px)}
-.week .has::after{display:none}
+.week .sel::before{content:"";position:absolute;left:30%;right:30%;bottom:9px;border-bottom:1px solid var(--ink)}
+.week .over{background:var(--line);outline:1px solid var(--accent)}
 .dots{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:center;gap:3px;pointer-events:none}
 .dots i{width:5px;height:5px;border-radius:50%}
-.week .sel::before{bottom:9px!important}
-.pick{flex:none;display:flex;align-items:center;gap:14px;padding:8px 0 2px;font-size:12px;color:var(--soft);letter-spacing:.04em}
-.pick span{flex:1}
-.pick button{width:22px;height:22px;border-radius:50%;border:0;padding:0;cursor:pointer;box-shadow:0 0 0 2px var(--paper),0 0 0 3px var(--line)}
+
+/* Bereiche */
+section{display:flex;flex-direction:column;min-height:0}
+#cal,#tasks,#notesSec{flex:0 1 auto}
+h2{flex:none;display:flex;justify-content:space-between;align-items:baseline;margin:0 0 4px;font:600 12px var(--body);letter-spacing:.16em;text-transform:uppercase}
+h2 span,h2 button{font:300 12px var(--body);letter-spacing:.04em;text-transform:none;color:var(--soft)}
+h2 button{background:none;border:0;padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--line)}
+ul{list-style:none;margin:0;padding:0;overflow-y:auto;min-height:2.2em;flex:1 1 auto}
+li{display:flex;align-items:baseline;gap:12px;padding:5px 0}
+li .txt{flex:1;min-width:0;overflow-wrap:anywhere;cursor:text}
+li time{font-size:13px;color:var(--soft);min-width:38px;display:inline-block;font-variant-numeric:tabular-nums}
+li.done .txt{text-decoration:line-through;text-decoration-color:var(--soft);color:var(--soft)}
+.empty{font-style:italic;color:var(--soft)}
+#eventList li{border-bottom:1px solid var(--line);padding:7px 0}
+#noteList li{gap:10px;padding:4px 0}
+#noteList li:not(.empty)::before{content:"–";color:var(--soft);flex:none}
+
+/* kleine Bedienelemente mit unsichtbar vergrößerter Tippfläche */
+.x,.check,.grip,.cdot{position:relative;flex:none}
+.x::after,.check::after,.grip::after,.cdot::after{content:"";position:absolute;inset:-11px}
+.x{background:none;border:0;color:var(--soft);font-size:16px;padding:0 2px;cursor:pointer;opacity:.6}
+.check{width:15px;height:15px;border:1.5px solid var(--c,var(--ink));border-radius:50%;background:none;padding:0;cursor:pointer;transform:translateY(2px)}
+li.done .check{background:var(--c,var(--ink))}
+.cdot{width:9px;height:9px;border-radius:50%;border:1px solid var(--soft);background:none;padding:0;cursor:pointer}
+.cdot[data-on]{border-color:transparent}
+.grip{touch-action:none;cursor:grab;color:var(--soft);user-select:none;-webkit-user-select:none;font-size:14px;letter-spacing:-2px;margin-right:-4px}
+.ghost{position:fixed;z-index:50;pointer-events:none;transform:translate(-50%,-120%);background:var(--paper);border:1px solid var(--ink);border-radius:8px;padding:6px 12px;font-size:14px;max-width:70vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 6px 20px rgba(0,0,0,.18)}
+.etime{position:relative;flex:none;cursor:pointer}
+.etime select,.tbox select{-webkit-appearance:none;appearance:none;position:absolute;opacity:0;font-size:16px;border:0;padding:0;margin:0;cursor:pointer}
+.etime select{inset:-6px;width:calc(100% + 12px)}
+.tbox select{inset:0;width:100%;height:100%}
+
+/* Eingabezeilen */
+input[type=text],textarea{font:300 16px var(--body);color:var(--ink);background:transparent;border:0;outline:0}
+form{flex:none;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);padding:4px 0}
+#eventForm{border-bottom-color:var(--ink);margin-top:2px}
+form input{flex:1;min-width:0;padding:2px 0}
+input::placeholder,textarea::placeholder{color:var(--soft)}
+.inl{flex:1;min-width:0;padding:0;border-bottom:1px solid var(--ink)!important}
+.add{flex:none;width:28px;height:28px;border:1px solid var(--ink);border-radius:50%;background:none;font:300 18px/1 var(--body);cursor:pointer;padding:0}
 .tbox{flex:none;position:relative;display:flex;align-items:center;border:1px solid var(--line);border-radius:14px;padding:3px 10px;font-size:13px;color:var(--soft);white-space:nowrap;font-variant-numeric:tabular-nums;cursor:pointer}
 .tbox.set{color:var(--ink);border-color:var(--ink)}
-.tbox select{-webkit-appearance:none;appearance:none;position:absolute;inset:0;width:100%;height:100%;opacity:0;border:0;padding:0;margin:0;cursor:pointer;font-size:16px}
-input[type=text],textarea{font:300 16px var(--body);color:var(--ink);background:transparent;border:0;outline:0}
-form{flex:none;display:flex;gap:10px;border-bottom:1px solid var(--line);padding:4px 0}
-form input{flex:1;min-width:0;padding:2px 0}
-form input::placeholder,textarea::placeholder{color:var(--soft)}
-.add{flex:none;width:28px;height:28px;border:1px solid var(--ink);border-radius:50%;background:none;color:var(--ink);font:300 18px/1 var(--body);cursor:pointer;padding:0}
-textarea{flex:1;min-height:0;resize:none;padding:4px 0;line-height:1.5;
-  background-image:linear-gradient(transparent calc(1.5em - 1px),var(--line) 0);background-size:100% 1.5em;background-attachment:local}
+.pick{flex:none;display:flex;align-items:center;gap:16px;padding:9px 0 2px;font-size:12px;color:var(--soft);letter-spacing:.04em}
+.pick span{flex:1}
+.pick button[data-c]{position:relative;width:20px;height:20px;border-radius:50%;border:1px solid transparent;padding:0;cursor:pointer;background:none}
+.pick button[data-c=""]{border-color:var(--soft)}
+.pick button[data-c]::after{content:"";position:absolute;inset:-8px}
+
+footer{flex:none;display:flex;justify-content:space-between;margin-top:auto}
+footer button{background:none;border:0;padding:4px 0;cursor:pointer;font-size:10px}
+
+/* Sichern-Blatt */
+#sheet{position:fixed;inset:0;z-index:60;background:var(--paper);display:flex;flex-direction:column;gap:14px;box-sizing:border-box;
+  padding:calc(24px + env(safe-area-inset-top,0px)) max(22px,env(safe-area-inset-right,0px)) calc(20px + env(safe-area-inset-bottom,0px)) max(22px,env(safe-area-inset-left,0px))}
+#sheet p{margin:0;color:var(--soft);font-size:14px}
+#sheet textarea{flex:1;min-height:0;resize:none;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:12px;line-height:1.4}
+#sheet .row{display:flex;flex-wrap:wrap;gap:10px}
+#sheet .row button{flex:1;white-space:nowrap;background:none;border:1px solid var(--ink);border-radius:20px;padding:9px 12px;font:300 14px var(--body);cursor:pointer}
+#sheet .row button.quiet{border-color:var(--line);color:var(--soft)}
 :focus-visible{outline:1px solid var(--accent);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){.week button{transition:none}}
 </style>
 
-<div class="page">
-  <header>
-    <div class="date" id="date"></div>
-  </header>
+<div class="page" id="page">
+  <header><div class="date" id="date"></div></header>
 
-  <div class="week" id="week"></div>
+  <div class="weekbox">
+    <div class="wlabel"><span id="wlabel"></span><button id="toToday" hidden>Heute</button></div>
+    <div class="week" id="week"></div>
+  </div>
 
   <section id="cal">
     <h2>Termine <span id="selLabel"></span></h2>
     <ul id="eventList"></ul>
     <form id="eventForm"><label class="tbox" id="tbox"><span id="tlabel">Uhrzeit</span><select id="evTime" aria-label="Uhrzeit wählen"></select></label><input type="text" id="evText" placeholder="Neuer Termin" autocomplete="off"><button class="add" type="submit" aria-label="Termin hinzufügen">+</button></form>
-    <div class="pick" id="pick" hidden><span>Farbe wählen</span><button data-c="rot" style="background:#c4453a" aria-label="Rot"></button><button data-c="blau" style="background:#3b6cb4" aria-label="Blau"></button><button data-c="gruen" style="background:#4a8a5a" aria-label="Grün"></button><button data-c="gelb" style="background:#d9a926" aria-label="Gelb"></button></div>
+    <div class="pick" id="pick" hidden></div>
   </section>
 
   <section id="tasks">
-    <h2>Aufgaben <span id="todoCount"></span></h2>
+    <h2>Aufgaben <span><span id="todoCount"></span><button id="clearDone" hidden>Erledigte entfernen</button></span></h2>
     <ul id="todoList"></ul>
     <form id="todoForm"><input type="text" id="todoInput" placeholder="Neue Aufgabe" autocomplete="off"><button class="add" type="submit" aria-label="Aufgabe hinzufügen">+</button></form>
-    <div class="pick" id="tpick" hidden><span>Farbe wählen</span><button data-c="rot" style="background:#c4453a" aria-label="Rot"></button><button data-c="blau" style="background:#3b6cb4" aria-label="Blau"></button><button data-c="gruen" style="background:#4a8a5a" aria-label="Grün"></button><button data-c="gelb" style="background:#d9a926" aria-label="Gelb"></button></div>
+    <div class="pick" id="tpick" hidden></div>
   </section>
 
   <section id="notesSec">
@@ -99,66 +121,104 @@ textarea{flex:1;min-height:0;resize:none;padding:4px 0;line-height:1.5;
     <ul id="noteList"></ul>
     <form id="noteForm"><input type="text" id="noteInput" placeholder="Neue Notiz" autocomplete="off"><button class="add" type="submit" aria-label="Notiz hinzufügen">+</button></form>
   </section>
+
+  <footer><button id="backup">Sichern</button><button id="theme"></button></footer>
+</div>
+
+<div id="sheet" hidden>
+  <h2>Daten sichern</h2>
+  <p>Kopiere diesen Text und bewahre ihn auf, zum Beispiel in der Notizen-App. Zum Wiederherstellen fügst du ihn hier wieder ein.</p>
+  <textarea id="sheetText" spellcheck="false" aria-label="Gesicherte Daten"></textarea>
+  <p id="sheetMsg" role="status"></p>
+  <div class="row"><button id="sheetCopy">Kopieren</button><button id="sheetRestore">Wiederherstellen</button><button id="sheetClose" class="quiet">Schließen</button></div>
 </div>
 
 <script>
 const load=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}};
 const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const key=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 const $=id=>document.getElementById(id);
-const now=new Date(), today=key(now);
 const COL={rot:"#c4453a",blau:"#3b6cb4",gruen:"#4a8a5a",gelb:"#d9a926"};
+const ORDER=["","rot","blau","gruen","gelb"], NAME={"":"Ohne Farbe",rot:"Rot",blau:"Blau",gruen:"Grün",gelb:"Gelb"};
+const colorOf=c=>COL[c]||"var(--soft)";
+const nextColor=c=>ORDER[(ORDER.indexOf(COL[c]?c:"")+1)%ORDER.length];
+
 /* Uhrzeiten in 10-Minuten-Schritten, beginnend 06:00 */
 const TIMES=[];for(let k=0;k<144;k++){const m=(360+k*10)%1440;TIMES.push(String(m/60|0).padStart(2,"0")+":"+String(m%60).padStart(2,"0"))}
-function opts(v){const list=v&&!TIMES.includes(v)?[v,...TIMES]:TIMES;return `<option value="">ohne Uhrzeit</option>`+list.map(t=>`<option${t===v?" selected":""}>${t}</option>`).join("")}
-document.getElementById("evTime").innerHTML=opts("");
+function opts(v){const list=v&&!TIMES.includes(v)?[v,...TIMES]:TIMES;return `<option value="">ohne Uhrzeit</option>`+list.map(t=>`<option${t===v?" selected":""}>${esc(t)}</option>`).join("")}
+$("evTime").innerHTML=opts("");
 
+let today=key(new Date());
 let todos=load("todos",[{t:"Beispiel: Zahnarzt anrufen",d:false},{t:"Beispiel: Wocheneinkauf",d:true}]);
 let events=load("events",{[today]:[{h:"18:30",t:"Beispiel: Abendessen mit Freunden"}]});
-let sel=today;
+let notes=load("noteList",null);
+if(!notes)notes=String(load("notes","")).split("\n").map(s=>s.trim()).filter(Boolean);
+let sel=today, weekOffset=0;
 
-function tick(){const d=new Date();$("date").textContent=d.toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"})+" · "+d.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})}
-tick();setInterval(tick,15000);
+/* Datum, Uhr und Tageswechsel um Mitternacht */
+function tick(){const d=new Date();$("date").textContent=d.toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"})+" · "+d.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});
+  const t=key(d);if(t!==today){if(sel===today)sel=t;today=t;renderEvents()}}
+setInterval(tick,15000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)tick()});
 
+/* Kalender: zwei Wochen, wochenweise wischbar */
 function renderWeek(){
-  const start=new Date(now);start.setDate(now.getDate()-((now.getDay()+6)%7));
-  let h="";for(let i=0;i<14;i++){const d=new Date(start);d.setDate(start.getDate()+i);const k=key(d);
-    h+=`<button class="${k===today?"today ":""}${k===sel?"sel ":""}${(events[k]||[]).length?"has":""}" style="--dot:${COL[(events[k]||[])[0]?.c]||"var(--accent)"}" data-k="${k}"><span class="dots">${[...new Set((events[k]||[]).map(e=>COL[e.c]||"var(--accent)"))].slice(0,4).map(c=>`<i style="background:${c}"></i>`).join("")}</span>${i<7?`<small>${d.toLocaleDateString("de-DE",{weekday:"short"}).slice(0,2)}</small>`:""}${d.getDate()}</button>`}
+  const n=new Date(),start=new Date(n.getFullYear(),n.getMonth(),n.getDate()-((n.getDay()+6)%7)+weekOffset*7,12);
+  let h="",end;for(let i=0;i<14;i++){const d=new Date(start);d.setDate(start.getDate()+i);end=d;const k=key(d);
+    const cols=[...new Set((events[k]||[]).map(e=>colorOf(e.c)))].slice(0,4);
+    h+=`<button class="${k===today?"today ":""}${k===sel?"sel":""}" data-k="${k}" aria-label="${d.toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"})}"><span class="dots">${cols.map(c=>`<i style="background:${c}"></i>`).join("")}</span>${i<7?`<small>${d.toLocaleDateString("de-DE",{weekday:"short"}).slice(0,2)}</small>`:""}${d.getDate()}</button>`}
   $("week").innerHTML=h;
+  const m=d=>d.toLocaleDateString("de-DE",{month:"long"});
+  $("wlabel").textContent=(m(start)===m(end)?m(start):m(start)+" – "+m(end))+" "+end.getFullYear();
+  $("toToday").hidden=weekOffset===0;
 }
+let swipe=null,swiped=false;
+$("week").addEventListener("pointerdown",e=>{swipe={x:e.clientX,y:e.clientY}});
+$("week").addEventListener("pointerup",e=>{if(!swipe)return;const dx=e.clientX-swipe.x,dy=e.clientY-swipe.y;swipe=null;
+  if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy)*1.5){weekOffset+=dx<0?1:-1;swiped=true;setTimeout(()=>swiped=false,300);renderWeek()}});
+$("week").addEventListener("pointercancel",()=>swipe=null);
+$("week").addEventListener("click",e=>{if(swiped)return;const b=e.target.closest("button");if(b){sel=b.dataset.k;closePick("pick");renderEvents()}});
+$("toToday").addEventListener("click",()=>{weekOffset=0;sel=today;closePick("pick");renderEvents()});
+
+/* Text an Ort und Stelle bearbeiten */
+function edit(span,val,commit){const inp=document.createElement("input");inp.type="text";inp.className="inl";inp.id="inlineEdit";inp.value=val;span.replaceWith(inp);inp.focus();
+  let done=false;const fin=()=>{if(done)return;done=true;commit(inp.value.trim())};
+  inp.addEventListener("blur",fin);inp.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();inp.blur()}});}
+
+/* Farbauswahl: freiwillig, mit Abbrechen */
+const pickHTML=`<span>Farbe</span>`+ORDER.map(c=>`<button type="button" data-c="${c}" style="${c?`background:${COL[c]}`:""}" aria-label="${NAME[c]}"></button>`).join("")+`<button type="button" class="x" data-cancel aria-label="Abbrechen">×</button>`;
+$("pick").innerHTML=$("tpick").innerHTML=pickHTML;
+function closePick(id){$(id).hidden=true}
+function wirePick(pickId,inputId,formId,create){
+  $(formId).addEventListener("submit",e=>{e.preventDefault();if($(inputId).value.trim())$(pickId).hidden=false;else{closePick(pickId);$(inputId).focus()}});
+  $(inputId).addEventListener("input",()=>{if(!$(inputId).value.trim())closePick(pickId)});
+  $(pickId).addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+    if(b.dataset.c!==undefined){const t=$(inputId).value.trim();if(t){create(t,b.dataset.c);$(inputId).value=""}}
+    closePick(pickId)});
+}
+
+/* Termine */
 function renderEvents(){
   $("selLabel").textContent=sel===today?"heute":new Date(sel+"T12:00").toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"});
-  const ev=(events[sel]||[]).map((x,i)=>({...x,i})).sort((a,b)=>a.h.localeCompare(b.h));
-  $("eventList").innerHTML=ev.length?ev.map(x=>`<li><span class="grip" data-g="${x.i}" aria-label="Ziehen, um Termin zu verschieben">⋮⋮</span><label class="etime"><time>${esc(x.h||"—")}</time><select data-ti="${x.i}" aria-label="Uhrzeit ändern">${opts(x.h)}</select></label><i class="cdot" style="background:${COL[x.c]||"var(--accent)"}"></i><span>${esc(x.t)}</span><button class="x" data-e="${x.i}" aria-label="Löschen">×</button></li>`).join(""):`<li class="empty">Keine Termine</li>`;
+  const ev=(events[sel]||[]).map((x,i)=>({...x,i})).sort((a,b)=>(a.h||"").localeCompare(b.h||""));
+  $("eventList").innerHTML=ev.length?ev.map(x=>`<li><span class="grip" data-g="${x.i}" aria-label="Ziehen, um den Termin auf einen anderen Tag zu legen">⋮⋮</span><label class="etime"><time>${esc(x.h||"—")}</time><select data-ti="${x.i}" aria-label="Uhrzeit ändern">${opts(x.h||"")}</select></label><button class="cdot" data-ec="${x.i}" ${COL[x.c]?`data-on style="background:${COL[x.c]}"`:""} aria-label="Farbe ändern"></button><span class="txt" data-et="${x.i}">${esc(x.t)}</span><button class="x" data-e="${x.i}" aria-label="Löschen">×</button></li>`).join(""):`<li class="empty">Keine Termine</li>`;
   save("events",events);renderWeek();
 }
-function renderTodos(){
-  $("todoList").innerHTML=todos.length?todos.map((x,i)=>`<li class="${x.d?"done":""}"><button class="check" style="--c:${COL[x.c]||"var(--ink)"}" data-i="${i}" aria-label="${x.d?"Wieder öffnen":"Erledigt"}"></button><span>${esc(x.t)}</span><button class="x" data-del="${i}" aria-label="Löschen">×</button></li>`).join(""):`<li class="empty">Alles erledigt</li>`;
-  $("todoCount").textContent=`${todos.filter(x=>!x.d).length} offen`;
-  save("todos",todos);
-}
-$("week").addEventListener("click",e=>{const b=e.target.closest("button");if(b){sel=b.dataset.k;renderEvents()}});
-$("eventList").addEventListener("click",e=>{const i=e.target.dataset.e;if(i!==undefined){events[sel].splice(+i,1);if(!events[sel].length)delete events[sel];renderEvents()}});
-$("eventForm").addEventListener("submit",e=>{e.preventDefault();if($("evText").value.trim())$("pick").hidden=false;else $("evText").focus()});
-$("pick").addEventListener("click",e=>{const c=e.target.dataset.c;if(!c)return;const tx=$("evText"),tm=$("evTime");
-  (events[sel]=events[sel]||[]).push({h:tm.value.trim(),t:tx.value.trim(),c});tx.value="";tm.value="";showTime();$("pick").hidden=true;renderEvents()});
-function showTime(){const v=$("evTime").value;$("tlabel").textContent=v?v+" Uhr":"Uhrzeit";$("tbox").classList.toggle("set",!!v)}
-$("evTime").addEventListener("input",showTime);$("evTime").addEventListener("change",showTime);
-$("todoList").addEventListener("click",e=>{
-  if(e.target.dataset.del!==undefined){todos.splice(+e.target.dataset.del,1);renderTodos()}
-  else if(e.target.dataset.i!==undefined){const x=todos[+e.target.dataset.i];x.d=!x.d;renderTodos()}
-});
-$("todoForm").addEventListener("submit",e=>{e.preventDefault();if($("todoInput").value.trim())$("tpick").hidden=false;else $("todoInput").focus()});
-$("tpick").addEventListener("click",e=>{const c=e.target.dataset.c;if(!c)return;const i=$("todoInput");todos.unshift({t:i.value.trim(),d:false,c});i.value="";$("tpick").hidden=true;renderTodos()});
+$("eventList").addEventListener("click",e=>{const d=e.target.dataset,list=events[sel];if(!list)return;
+  if(d.e!==undefined){list.splice(+d.e,1);if(!list.length)delete events[sel];renderEvents()}
+  else if(d.ec!==undefined){list[+d.ec].c=nextColor(list[+d.ec].c);renderEvents()}
+  else if(d.et!==undefined){const i=+d.et;edit(e.target,list[i].t,v=>{if(v&&events[sel]?.[i])events[sel][i].t=v;renderEvents()})}});
 $("eventList").addEventListener("change",e=>{const i=e.target.dataset.ti;if(i!==undefined&&events[sel]?.[+i]){events[sel][+i].h=e.target.value;renderEvents()}});
-/* Termine per Ziehen auf einen Tag verschieben (Touch + Maus) */
+wirePick("pick","evText","eventForm",(t,c)=>{(events[sel]=events[sel]||[]).push({h:$("evTime").value,t,c});$("evTime").value="";showTime();renderEvents()});
+function showTime(){const v=$("evTime").value;$("tlabel").textContent=v?v+" Uhr":"Uhrzeit";$("tbox").classList.toggle("set",!!v)}
+$("evTime").addEventListener("change",showTime);
+
+/* Termin per Ziehen auf einen Tag legen (Finger und Maus) */
 let drag=null;
 const overDay=(x,y)=>document.elementFromPoint(x,y)?.closest(".week button");
 $("eventList").addEventListener("pointerdown",e=>{const g=e.target.closest(".grip");if(!g)return;e.preventDefault();
   const ev=events[sel][+g.dataset.g];const gh=document.createElement("div");gh.className="ghost";gh.textContent=(ev.h?ev.h+"  ":"")+ev.t;document.body.append(gh);
-  drag={i:+g.dataset.g,gh,over:null};moveDrag(e);try{g.setPointerCapture(e.pointerId)}catch(_){}
-});
+  drag={i:+g.dataset.g,gh,over:null};moveDrag(e);try{g.setPointerCapture(e.pointerId)}catch(_){}});
 function moveDrag(e){if(!drag)return;drag.gh.style.left=e.clientX+"px";drag.gh.style.top=e.clientY+"px";const b=overDay(e.clientX,e.clientY);
   if(b!==drag.over){drag.over?.classList.remove("over");b?.classList.add("over");drag.over=b}}
 function endDrag(drop){if(!drag)return;const {i,gh,over}=drag;gh.remove();over?.classList.remove("over");drag=null;
@@ -167,21 +227,56 @@ document.addEventListener("pointermove",moveDrag);
 document.addEventListener("pointerup",()=>endDrag(true));
 document.addEventListener("pointercancel",()=>endDrag(false));
 
-/* Notizen als Stichpunkte; Antippen = bearbeiten */
-let notes=load("noteList",null);
-if(!notes){notes=String(load("notes","")).split("\n").map(s=>s.trim()).filter(Boolean)}
+/* Aufgaben: offene oben, erledigte unten */
+function renderTodos(){
+  const view=todos.map((x,i)=>({...x,i})).sort((a,b)=>(a.d?1:0)-(b.d?1:0));
+  $("todoList").innerHTML=view.length?view.map(x=>`<li class="${x.d?"done":""}"><button class="check" style="--c:${COL[x.c]||"var(--ink)"}" data-i="${x.i}" aria-label="${x.d?"Wieder öffnen":"Erledigt"}"></button><span class="txt" data-tt="${x.i}">${esc(x.t)}</span><button class="cdot" data-tc="${x.i}" ${COL[x.c]?`data-on style="background:${COL[x.c]}"`:""} aria-label="Farbe ändern"></button><button class="x" data-del="${x.i}" aria-label="Löschen">×</button></li>`).join(""):`<li class="empty">Keine Aufgaben</li>`;
+  const done=todos.filter(x=>x.d).length;
+  $("todoCount").textContent=`${todos.length-done} offen`+(done?" · ":"");$("clearDone").hidden=!done;
+  save("todos",todos);
+}
+$("todoList").addEventListener("click",e=>{const d=e.target.dataset;
+  if(d.del!==undefined){todos.splice(+d.del,1);renderTodos()}
+  else if(d.i!==undefined){todos[+d.i].d=!todos[+d.i].d;renderTodos()}
+  else if(d.tc!==undefined){todos[+d.tc].c=nextColor(todos[+d.tc].c);renderTodos()}
+  else if(d.tt!==undefined){const i=+d.tt;edit(e.target,todos[i].t,v=>{if(v&&todos[i])todos[i].t=v;renderTodos()})}});
+$("clearDone").addEventListener("click",()=>{todos=todos.filter(x=>!x.d);renderTodos()});
+wirePick("tpick","todoInput","todoForm",(t,c)=>{todos.unshift({t,d:false,c});renderTodos()});
+
+/* Notizen als Stichpunkte */
 function renderNotes(){
-  $("noteList").innerHTML=notes.length?notes.map((n,i)=>`<li><span data-n="${i}">${esc(n)}</span><button class="x" data-nd="${i}" aria-label="Löschen">×</button></li>`).join(""):`<li class="empty">Noch keine Notizen</li>`;
+  $("noteList").innerHTML=notes.length?notes.map((n,i)=>`<li><span class="txt" data-n="${i}">${esc(n)}</span><button class="x" data-nd="${i}" aria-label="Löschen">×</button></li>`).join(""):`<li class="empty">Noch keine Notizen</li>`;
   save("noteList",notes);
 }
-$("noteList").addEventListener("click",e=>{
-  const d=e.target.dataset.nd;if(d!==undefined){notes.splice(+d,1);renderNotes();return}
-  const s=e.target.closest("span[data-n]");if(!s)return;const i=+s.dataset.n;
-  const inp=document.createElement("input");inp.type="text";inp.id="noteEdit";inp.value=notes[i];s.replaceWith(inp);inp.focus();
-  let done=false;const fin=()=>{if(done)return;done=true;const v=inp.value.trim();if(v)notes[i]=v;else notes.splice(i,1);renderNotes()};
-  inp.addEventListener("blur",fin);inp.addEventListener("keydown",ev=>{if(ev.key==="Enter"){ev.preventDefault();inp.blur()}});
-});
+$("noteList").addEventListener("click",e=>{const d=e.target.dataset;
+  if(d.nd!==undefined){notes.splice(+d.nd,1);renderNotes()}
+  else if(d.n!==undefined){const i=+d.n;edit(e.target,notes[i],v=>{if(v)notes[i]=v;else notes.splice(i,1);renderNotes()})}});
 $("noteForm").addEventListener("submit",e=>{e.preventDefault();const i=$("noteInput");if(i.value.trim()){notes.push(i.value.trim());i.value="";renderNotes()}});
-renderNotes();
-renderEvents();renderTodos();
+
+/* Darstellung: Auto / Hell / Dunkel */
+const root=document.documentElement,hostTheme=root.dataset.theme;
+let theme=load("theme","auto");
+function applyTheme(){if(theme==="auto"){if(hostTheme)root.dataset.theme=hostTheme;else delete root.dataset.theme}else root.dataset.theme=theme;
+  $("theme").textContent={auto:"Automatisch",light:"Hell",dark:"Dunkel"}[theme]}
+$("theme").addEventListener("click",()=>{theme={auto:"light",light:"dark",dark:"auto"}[theme];save("theme",theme);applyTheme()});
+
+/* Sichern und Wiederherstellen */
+let armed=false;
+$("backup").addEventListener("click",()=>{$("sheetText").value=JSON.stringify({todos,events,notes});$("sheetMsg").textContent="";armed=false;$("sheetRestore").textContent="Wiederherstellen";$("sheet").hidden=false});
+$("sheetClose").addEventListener("click",()=>{$("sheet").hidden=true});
+$("sheetCopy").addEventListener("click",()=>{const t=$("sheetText");const ok=()=>$("sheetMsg").textContent="Kopiert.";
+  const manual=()=>{t.focus();t.select();$("sheetMsg").textContent="Text ist markiert – bitte über „Kopieren“ im Menü kopieren."};
+  try{navigator.clipboard.writeText(t.value).then(ok,manual)}catch(_){manual()}});
+$("sheetText").addEventListener("input",()=>{armed=false;$("sheetRestore").textContent="Wiederherstellen"});
+$("sheetRestore").addEventListener("click",()=>{let d;try{d=JSON.parse($("sheetText").value)}catch(_){}
+  if(!d||!Array.isArray(d.todos)||!Array.isArray(d.notes)||typeof d.events!=="object"||!d.events||Array.isArray(d.events)){$("sheetMsg").textContent="Das ist keine gültige Sicherung. Bitte den gesicherten Text vollständig einfügen.";return}
+  if(!armed){armed=true;$("sheetRestore").textContent="Wirklich ersetzen?";$("sheetMsg").textContent="Die jetzigen Einträge werden durch die Sicherung ersetzt.";return}
+  todos=d.todos;events=d.events;notes=d.notes;renderEvents();renderTodos();renderNotes();$("sheet").hidden=true});
+
+/* Tastatur: Seite auf den sichtbaren Bereich verkleinern, damit das aktive Feld nicht verdeckt wird */
+if(window.visualViewport){const vv=window.visualViewport;vv.addEventListener("resize",()=>{
+  const open=vv.height<window.innerHeight-100;$("page").style.height=open?(vv.height-24)+"px":"";
+  if(open){window.scrollTo(0,0);document.activeElement?.scrollIntoView?.({block:"nearest"})}})}
+
+applyTheme();tick();renderEvents();renderTodos();renderNotes();
 </script>
