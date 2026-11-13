@@ -5,12 +5,12 @@
 <style>
 /* Layout: ein Bildschirm, eine Spalte – Datum, zwei Wochen (wischbar), Termine, Aufgaben, Notizen; nur Haarlinien, viel Luft */
 :root{
-  --paper:#f8f7f3; --ink:#1a1917; --soft:#8a867c; --line:#dcd8ce; --accent:#8f1d16;
+  --paper:#f8f7f3; --ink:#1a1917; --soft:#8a867c; --line:#dcd8ce; --accent:#8f1d16; --veil:rgba(26,25,23,.16);
   --body:"Inter",-apple-system,system-ui,sans-serif;
   color-scheme:light;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--paper:#171614;--ink:#ebe7dc;--soft:#8e897e;--line:#34322d;--accent:#d98078;color-scheme:dark}}
-:root[data-theme="dark"]{--paper:#171614;--ink:#ebe7dc;--soft:#8e897e;--line:#34322d;--accent:#d98078;color-scheme:dark}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--paper:#171614;--ink:#ebe7dc;--soft:#8e897e;--line:#34322d;--accent:#d98078;--veil:rgba(0,0,0,.55);color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#171614;--ink:#ebe7dc;--soft:#8e897e;--line:#34322d;--accent:#d98078;--veil:rgba(0,0,0,.55);color-scheme:dark}
 html,body{height:100%}
 body{background:var(--paper);color:var(--ink);font:300 16px/1.45 var(--body);box-sizing:border-box;overflow:hidden;
   padding-left:max(22px,env(safe-area-inset-left,0px));padding-right:max(22px,env(safe-area-inset-right,0px));padding-block:14px 10px}
@@ -30,7 +30,8 @@ header{flex:none;text-align:center}
 .week .sel::before{content:"";position:absolute;left:30%;right:30%;bottom:9px;border-bottom:1px solid var(--ink)}
 .week .over{background:var(--line);outline:1px solid var(--accent)}
 .dots{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:center;gap:3px;pointer-events:none}
-.dots i{width:5px;height:5px;border-radius:50%}
+.dots i{width:5px;height:5px;border-radius:50%;box-sizing:border-box}
+.dots i.ring{background:none!important;border:1px solid var(--rc)}
 
 /* Bereiche */
 section{display:flex;flex-direction:column;min-height:0}
@@ -48,6 +49,10 @@ li.done .tl i{opacity:.25}
 .ogrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .ogrid button{background:none;border:1px solid var(--line);border-radius:10px;padding:9px 0;font:300 14px var(--body);cursor:pointer}
 .ogrid button.on{border-color:var(--ink)}
+.dgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center}
+.dgrid small{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--soft);padding-bottom:2px}
+.dgrid button{background:none;border:1px solid transparent;border-radius:10px;padding:6px 0;font:300 15px var(--body);font-variant-numeric:tabular-nums;cursor:pointer}
+.dgrid button.on{border-color:var(--ink)}
 .ocols{display:flex;gap:18px;align-items:center}
 .ocols button{position:relative;width:24px;height:24px;border-radius:50%;border:1px solid transparent;padding:0;cursor:pointer;background:none}
 .ocols button[data-oc=""]{border-color:var(--soft)}
@@ -62,7 +67,6 @@ li{display:flex;align-items:center;gap:12px;padding:5px 0}
 li .txt{flex:1;min-width:0;overflow-wrap:anywhere;cursor:text}
 li time{font-size:13px;color:var(--soft);min-width:38px;display:inline-block;font-variant-numeric:tabular-nums}
 li.done .txt{text-decoration:line-through;text-decoration-color:var(--soft);color:var(--soft)}
-.empty{font-style:italic;color:var(--soft)}
 #eventList li{border-bottom:1px solid var(--line);padding:7px 0}
 #noteList li{gap:10px;padding:4px 0}
 #noteList .dash{color:var(--soft);flex:none;margin-left:-2px}
@@ -70,7 +74,9 @@ li.done .txt{text-decoration:line-through;text-decoration-color:var(--soft);colo
 /* kleine Bedienelemente mit unsichtbar vergrößerter Tippfläche */
 .x,.check,.grip,.rgrip,.cdot{position:relative;flex:none}
 .x::after,.check::after,.grip::after,.rgrip::after,.cdot::after{content:"";position:absolute;inset:-11px}
-.x{background:none;border:0;color:var(--soft);font-size:16px;padding:0 2px;cursor:pointer;opacity:.6}
+.x{background:none;border:0;width:14px;height:14px;padding:0;cursor:pointer;opacity:.6;display:grid;place-items:center}
+.x svg{width:9px;height:9px;fill:none;stroke:var(--soft);stroke-width:1.1;stroke-linecap:round;pointer-events:none;display:block}
+.add svg{pointer-events:none}
 .check{width:15px;height:15px;border:1.5px solid var(--c,var(--ink));border-radius:50%;background:none;padding:0;cursor:pointer}
 li.done .check{background:var(--c,var(--ink))}
 .cdot{width:9px;height:9px;border-radius:50%;border:1px solid var(--soft);background:none;padding:0;cursor:pointer}
@@ -88,7 +94,7 @@ li.lift{opacity:.45}
 .etime::after{content:"";position:absolute;inset:-10px -6px}
 
 /* Uhrzeit-Auswahl: eigenes Blatt im Stil der App */
-#tsheet,#osheet{position:fixed;inset:0;z-index:70;display:flex;align-items:flex-end;justify-content:center;background:color-mix(in srgb,var(--ink) 14%,transparent)}
+#tsheet,#osheet{position:fixed;inset:0;z-index:70;display:flex;align-items:flex-end;justify-content:center;background:var(--veil)}
 .tpanel{width:100%;max-width:520px;box-sizing:border-box;background:var(--paper);border-top:1px solid var(--line);border-radius:18px 18px 0 0;display:flex;flex-direction:column;gap:12px;
   padding:18px max(22px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(22px,env(safe-area-inset-left,0px));box-shadow:0 -10px 30px rgba(0,0,0,.08)}
 .thead{display:flex;justify-content:space-between;align-items:baseline}
@@ -127,6 +133,7 @@ input::placeholder,textarea::placeholder{color:var(--soft)}
 .pick button[data-c]::after{content:"";position:absolute;inset:-8px}
 
 footer{flex:none;display:flex;justify-content:space-between;margin-top:auto}
+footer #undo{color:var(--ink);text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--soft)}
 footer button{background:none;border:0;padding:4px 0;cursor:pointer;font-size:10px}
 
 /* Sichern-Blatt */
@@ -169,7 +176,7 @@ footer button{background:none;border:0;padding:4px 0;cursor:pointer;font-size:10
     <form id="noteForm"><input type="text" id="noteInput" placeholder="Neue Notiz" autocomplete="off"><button class="add" type="submit" aria-label="Notiz hinzufügen"><svg viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="13.4" stroke-width="1"/><path d="M14 8.5v11M8.5 14h11"/></svg></button></form>
   </section>
 
-  <footer><button id="backup">Sichern</button><button id="theme"></button></footer>
+  <footer><button id="backup">Sichern</button><button id="undo" hidden>Rückgängig</button><button id="theme"></button></footer>
 </div>
 
 <div id="tsheet" hidden>
@@ -187,6 +194,7 @@ footer button{background:none;border:0;padding:4px 0;cursor:pointer;font-size:10
     <div id="otitle"></div>
     <div class="tlab">Farbe</div><div class="ocols" id="ocols"></div>
     <div class="tlab">Frist</div><div class="ogrid" id="ogrid"></div>
+    <div class="tlab">Oder ein Tag</div><div class="dgrid" id="dgrid"></div>
     <div class="tfoot"><span></span><button type="button" class="pill" id="ook">Fertig</button></div>
   </div>
 </div>
@@ -210,9 +218,9 @@ const ORDER=["","rot","blau","gruen","gelb"], NAME={"":"Ohne Farbe",rot:"Rot",bl
 const colorOf=c=>COL[c]||"var(--soft)";
 const nextColor=c=>ORDER[(ORDER.indexOf(COL[c]?c:"")+1)%ORDER.length];
 
-/* Uhrzeiten in 10-Minuten-Schritten, beginnend 06:00 */
-const TIMES=[];for(let k=0;k<144;k++){const m=(360+k*10)%1440;TIMES.push(String(m/60|0).padStart(2,"0")+":"+String(m%60).padStart(2,"0"))}
-function opts(v){const list=v&&!TIMES.includes(v)?[v,...TIMES]:TIMES;return `<option value="">ohne Uhrzeit</option>`+list.map(t=>`<option${t===v?" selected":""}>${esc(t)}</option>`).join("")}
+/* Rückgängig: Stand vor dem Löschen merken, ein paar Sekunden anbieten */
+let undoData=null,undoT=null;
+function snap(){undoData=JSON.stringify({todos,events,notes,rec});$("undo").hidden=false;clearTimeout(undoT);undoT=setTimeout(()=>{$("undo").hidden=true;undoData=null},7000)}
 
 let today=key(new Date());
 let todos=load("todos",[{t:"Beispiel: Zahnarzt anrufen",d:false},{t:"Beispiel: Wocheneinkauf",d:true}]);
@@ -238,7 +246,8 @@ function renderWeek(){
   const n=new Date(),start=new Date(n.getFullYear(),n.getMonth(),n.getDate()-((n.getDay()+6)%7)+weekOffset*7,12);
   let h="",end;for(let i=0;i<14;i++){const d=new Date(start);d.setDate(start.getDate()+i);end=d;const k=key(d);
     const cols=[...new Set(evsFor(k).map(e=>colorOf(e.c)))].slice(0,4);
-    h+=`<button class="${k===today?"today ":""}${k===sel?"sel":""}" data-k="${k}" aria-label="${d.toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"})}"><span class="dots">${cols.map(c=>`<i style="background:${c}"></i>`).join("")}</span>${i<7?`<small>${d.toLocaleDateString("de-DE",{weekday:"short"}).slice(0,2)}</small>`:""}${d.getDate()}</button>`}
+    const rings=[...new Set(todos.filter(t=>!t.d&&t.due===k).map(t=>colorOf(t.c)))].slice(0,Math.max(0,4-cols.length));
+    h+=`<button class="${k===today?"today ":""}${k===sel?"sel":""}" data-k="${k}" aria-label="${d.toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"})}"><span class="dots">${cols.map(c=>`<i style="background:${c}"></i>`).join("")}${rings.map(c=>`<i class="ring" style="--rc:${c}"></i>`).join("")}</span>${i<7?`<small>${d.toLocaleDateString("de-DE",{weekday:"short"}).slice(0,2)}</small>`:""}${d.getDate()}</button>`}
   $("week").innerHTML=h;
   const m=d=>d.toLocaleDateString("de-DE",{month:"long"});
   $("wlabel").textContent=(m(start)===m(end)?m(start):m(start)+" – "+m(end))+" "+end.getFullYear();
@@ -254,11 +263,11 @@ $("toToday").addEventListener("click",()=>{weekOffset=0;sel=today;closePick("pic
 
 /* Text an Ort und Stelle bearbeiten */
 function edit(span,val,commit){const inp=document.createElement("input");inp.type="text";inp.className="inl";inp.id="inlineEdit";inp.value=val;span.replaceWith(inp);inp.focus();
-  let done=false;const fin=()=>{if(done)return;done=true;commit(inp.value.trim())};
+  let done=false;const fin=()=>{if(done)return;done=true;const v=inp.value.trim();setTimeout(()=>commit(v),180)};
   inp.addEventListener("blur",fin);inp.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();inp.blur()}});}
 
 /* Farbauswahl: freiwillig, mit Abbrechen */
-const pickHTML=`<span>Farbe</span>`+ORDER.map(c=>`<button type="button" data-c="${c}" style="${c?`background:${COL[c]}`:""}" aria-label="${NAME[c]}"></button>`).join("")+`<button type="button" class="x" data-cancel aria-label="Abbrechen">×</button>`;
+const pickHTML=`<span>Farbe</span>`+ORDER.map(c=>`<button type="button" data-c="${c}" style="${c?`background:${COL[c]}`:""}" aria-label="${NAME[c]}"></button>`).join("")+`<button type="button" class="x" data-cancel aria-label="Abbrechen"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1 1l8 8M9 1l-8 8"/></svg></button>`;
 $("tpick").innerHTML=pickHTML.replace(`<span>Farbe</span>`,`<button type="button" class="rep" id="dueBtn" aria-label="Frist ändern">Ohne Frist</button>`);
 $("pick").innerHTML=pickHTML.replace(`<span>Farbe</span>`,`<button type="button" class="rep" id="rep" aria-label="Wiederholung ändern">Einmalig</button>`);
 function closePick(id){$(id).hidden=true;if(id==="pick"){rep="";$("rep").textContent=REP[""]}if(id==="tpick"){dueSel=0;$("dueBtn").textContent=DUE[0][1]}}
@@ -276,17 +285,16 @@ function wirePick(pickId,inputId,formId,create){
 function renderEvents(){
   $("selLabel").textContent=sel===today?"heute":new Date(sel+"T12:00").toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"});
   const ev=evsFor(sel).sort((a,b)=>(a.h||"").localeCompare(b.h||""));
-  $("eventList").innerHTML=ev.map(x=>`<li data-ref="${x.ref}">${x.ref[0]==="e"?`<span class="grip" data-g="${x.ref.slice(2)}" aria-label="Ziehen, um den Termin auf einen anderen Tag zu legen">⋮⋮</span>`:`<button class="repi" data-act="rep" aria-label="${REP[x.r]} – tippen zum Ändern">↻<small>${REPS[x.r]||""}</small></button>`}<button class="etime" data-act="time" aria-label="Uhrzeit ändern"><time data-act="time">${esc(x.h||"—")}</time></button><button class="cdot" data-act="col" ${COL[x.c]?`data-on style="background:${COL[x.c]}"`:""} aria-label="Farbe ändern"></button><span class="txt" data-act="txt">${esc(x.t)}</span><button class="x" data-act="del" aria-label="${x.ref[0]==="r"?"Serie löschen":"Löschen"}">×</button></li>`).join("");
+  $("eventList").innerHTML=ev.map(x=>`<li data-ref="${x.ref}">${x.ref[0]==="e"?`<span class="grip" data-g="${x.ref.slice(2)}" aria-label="Ziehen, um den Termin auf einen anderen Tag zu legen">⋮⋮</span>`:`<button class="repi" data-act="rep" aria-label="${REP[x.r]} – tippen zum Ändern">↻<small>${REPS[x.r]||""}</small></button>`}<button class="etime" data-act="time" aria-label="Uhrzeit ändern"><time data-act="time">${esc(x.h||"—")}</time></button><button class="cdot" data-act="col" ${COL[x.c]?`data-on style="background:${COL[x.c]}"`:""} aria-label="Farbe ändern"></button><span class="txt" data-act="txt">${esc(x.t)}</span><button class="x" data-act="del" aria-label="${x.ref[0]==="r"?"Serie löschen":"Löschen"}"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1 1l8 8M9 1l-8 8"/></svg></button></li>`).join("");
   save("events",events);save("rec",rec);renderWeek();
 }
 $("eventList").addEventListener("click",e=>{const act=e.target.dataset.act,li=e.target.closest("li[data-ref]");if(!act||!li)return;
   const r=li.dataset.ref,o=refObj(r);if(!o)return;
-  if(act==="del"){const [t,i]=r.split(":");if(t==="r")rec.splice(+i,1);else{events[sel].splice(+i,1);if(!events[sel].length)delete events[sel]}renderEvents()}
+  if(act==="del"){snap();const [t,i]=r.split(":");if(t==="r")rec.splice(+i,1);else{events[sel].splice(+i,1);if(!events[sel].length)delete events[sel]}renderEvents()}
   else if(act==="time"){openTime(o.h,v=>{o.h=v;renderEvents()})}
   else if(act==="col"){o.c=nextColor(o.c);renderEvents()}
-  else if(act==="rep"){const n=REPNEXT[o.r]||"";if(n)o.r=n;else{rec.splice(+r.split(":")[1],1);(events[sel]=events[sel]||[]).push({h:o.h,t:o.t,c:o.c})}renderEvents()}
+  else if(act==="rep"){const n=REPNEXT[o.r]||"";if(n)o.r=n;else{snap();rec.splice(+r.split(":")[1],1);(events[sel]=events[sel]||[]).push({h:o.h,t:o.t,c:o.c})}renderEvents()}
   else if(act==="txt"){edit(e.target,o.t,v=>{if(v)o.t=v;renderEvents()})}});
-$("eventList").addEventListener("change",e=>{if(e.target.dataset.act!=="time")return;const o=refObj(e.target.closest("li").dataset.ref);if(o){o.h=e.target.value;renderEvents()}});
 wirePick("pick","evText","eventForm",(t,c)=>{const h=$("evTime").value;if(rep)rec.push({t,h,c,r:rep,start:sel});else(events[sel]=events[sel]||[]).push({h,t,c});$("evTime").value="";showTime();renderEvents()});
 function showTime(){const v=$("evTime").value;$("tlabel").textContent=v?v+" Uhr":"";$("tbox").classList.toggle("set",!!v)}
 $("tbox").addEventListener("click",()=>openTime($("evTime").value,v=>{$("evTime").value=v;showTime()}));
@@ -324,17 +332,17 @@ document.addEventListener("pointercancel",()=>endDrag(false));
 /* Aufgaben: offene oben, erledigte unten */
 function renderTodos(){
   const view=todos.map((x,i)=>({...x,i})).sort((a,b)=>(a.d?1:0)-(b.d?1:0));
-  $("todoList").innerHTML=view.length?view.map(x=>`<li class="${x.d?"done":""}" data-idx="${x.i}"><span class="rgrip" aria-label="Ziehen, um die Reihenfolge zu ändern">⋮⋮</span><button class="check" style="--c:${COL[x.c]||"var(--ink)"}" data-i="${x.i}" aria-label="${x.d?"Wieder öffnen":"Erledigt"}"></button><span class="txt" data-tt="${x.i}">${esc(x.t)}</span>${dueHTML(x)}<button class="cdot" data-tc="${x.i}" ${COL[x.c]?`data-on style="background:${COL[x.c]}"`:""} aria-label="Farbe und Frist"></button><button class="x" data-del="${x.i}" aria-label="Löschen">×</button>${lineHTML(x)}</li>`).join(""):"";
+  $("todoList").innerHTML=view.length?view.map(x=>`<li class="${x.d?"done":""}" data-idx="${x.i}"><span class="rgrip" aria-label="Ziehen, um die Reihenfolge zu ändern">⋮⋮</span><button class="check" style="--c:${COL[x.c]||"var(--ink)"}" data-i="${x.i}" aria-label="${x.d?"Wieder öffnen":"Erledigt"}"></button><span class="txt" data-tt="${x.i}">${esc(x.t)}</span>${dueHTML(x)}<button class="cdot" data-tc="${x.i}" ${COL[x.c]?`data-on style="background:${COL[x.c]}"`:""} aria-label="Farbe und Frist"></button><button class="x" data-del="${x.i}" aria-label="Löschen"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1 1l8 8M9 1l-8 8"/></svg></button>${lineHTML(x)}</li>`).join(""):"";
   const done=todos.filter(x=>x.d).length;
   $("todoCount").textContent=`${todos.length-done} offen`+(done?" · ":"");$("clearDone").hidden=!done;
-  save("todos",todos);
+  save("todos",todos);renderWeek();
 }
 $("todoList").addEventListener("click",e=>{const d=e.target.dataset;
-  if(d.del!==undefined){todos.splice(+d.del,1);renderTodos()}
+  if(d.del!==undefined){snap();todos.splice(+d.del,1);renderTodos()}
   else if(d.i!==undefined){todos[+d.i].d=!todos[+d.i].d;renderTodos()}
   else if(d.tc!==undefined){openOpts(+d.tc)}
-  else if(d.tt!==undefined){const i=+d.tt;edit(e.target,todos[i].t,v=>{if(v&&todos[i])todos[i].t=v;renderTodos()})}});
-$("clearDone").addEventListener("click",()=>{todos=todos.filter(x=>!x.d);renderTodos()});
+  else if(d.tt!==undefined){const o=todos[+d.tt];edit(e.target,o.t,v=>{if(v)o.t=v;renderTodos()})}});
+$("clearDone").addEventListener("click",()=>{snap();todos=todos.filter(x=>!x.d);renderTodos()});
 wirePick("tpick","todoInput","todoForm",(t,c)=>{const o={t,d:false,c};if(DUE[dueSel][0]!=="")setDue(o,DUE[dueSel][0]);todos.unshift(o);renderTodos()});
 
 /* Fristen */
@@ -346,7 +354,7 @@ function dueText(x){const n=diff(today,x.due);
   if(n<0)return "überfällig";if(n===0)return "heute";if(n===1)return "morgen";
   if(n<7)return new Date(x.due+"T12:00").toLocaleDateString("de-DE",{weekday:"short"}).replace(".","");
   return new Date(x.due+"T12:00").toLocaleDateString("de-DE",{day:"numeric",month:"short"}).replace(/\.$/,"")}
-function dueHTML(x){if(!x.due)return "";const n=diff(today,x.due);return `<span class="due ${x.d?"":n<0?"late":n<=1?"soon":""}">${dueText(x)}</span>`}
+function dueHTML(x){if(!x.due||x.d)return "";const n=diff(today,x.due);return `<span class="due ${x.d?"":n<0?"late":n<=1?"soon":""}">${dueText(x)}</span>`}
 /* Linie zeigt, wie nah die Frist ist: 30 Tage oder mehr = fast leer, heute = voll */
 function lineHTML(x){if(!x.due)return `<span class="tl"></span>`;const p=Math.min(1,Math.max(0,1-diff(today,x.due)/30));
   const late=!x.d&&diff(today,x.due)<0;return `<span class="tl${late?" late":""}" style="--p:${late?100:Math.max(4,Math.round(p*100))}%;--f:${COL[x.c]||"var(--ink)"}"><i></i></span>`}
@@ -358,21 +366,24 @@ $("ogrid").innerHTML=DUE.map((d,i)=>`<button type="button" data-od="${i}">${d[0]
 function showOpts(){const o=todos[oi];if(!o)return;$("otitle").textContent=o.t;
   $("oval").textContent=o.due?new Date(o.due+"T12:00").toLocaleDateString("de-DE",{weekday:"short",day:"numeric",month:"short"}):"";
   $("ocols").querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.oc===(COL[o.c]?o.c:"")));
-  $("ogrid").querySelectorAll("button").forEach(b=>{const v=DUE[+b.dataset.od][0];b.classList.toggle("on",v===""?!o.due:o.due===addDays(o.at||today,v)&&o.at===today)})}
+  $("ogrid").querySelectorAll("button").forEach(b=>{const v=DUE[+b.dataset.od][0];b.classList.toggle("on",v===""?!o.due:o.due===addDays(today,v))});
+  let h="";for(let i=0;i<7;i++)h+=`<small>${new Date(addDays(today,i)+"T12:00").toLocaleDateString("de-DE",{weekday:"short"}).slice(0,2)}</small>`;
+  for(let i=0;i<21;i++){const k=addDays(today,i);h+=`<button type="button" data-dk="${k}" class="${o.due===k?"on":""}">${+k.slice(8)}</button>`}$("dgrid").innerHTML=h}
 function openOpts(i){oi=i;showOpts();$("osheet").hidden=false}
 $("ocols").addEventListener("click",e=>{const c=e.target.dataset.oc;if(c===undefined)return;todos[oi].c=c;showOpts();renderTodos()});
 $("ogrid").addEventListener("click",e=>{const i=e.target.dataset.od;if(i===undefined)return;setDue(todos[oi],DUE[+i][0]);showOpts();renderTodos()});
+$("dgrid").addEventListener("click",e=>{const k=e.target.dataset.dk;if(!k)return;todos[oi].due=k;todos[oi].at=today;showOpts();renderTodos()});
 $("ook").addEventListener("click",()=>{$("osheet").hidden=true});
 $("osheet").addEventListener("click",e=>{if(e.target.id==="osheet")$("osheet").hidden=true});
 
 /* Notizen als Stichpunkte */
 function renderNotes(){
-  $("noteList").innerHTML=notes.length?notes.map((n,i)=>`<li data-idx="${i}"><span class="rgrip" aria-label="Ziehen, um die Reihenfolge zu ändern">⋮⋮</span><span class="dash">–</span><span class="txt" data-n="${i}">${esc(n)}</span><button class="x" data-nd="${i}" aria-label="Löschen">×</button></li>`).join(""):"";
+  $("noteList").innerHTML=notes.length?notes.map((n,i)=>`<li data-idx="${i}"><span class="rgrip" aria-label="Ziehen, um die Reihenfolge zu ändern">⋮⋮</span><span class="dash">–</span><span class="txt" data-n="${i}">${esc(n)}</span><button class="x" data-nd="${i}" aria-label="Löschen"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1 1l8 8M9 1l-8 8"/></svg></button></li>`).join(""):"";
   save("noteList",notes);
 }
 $("noteList").addEventListener("click",e=>{const d=e.target.dataset;
-  if(d.nd!==undefined){notes.splice(+d.nd,1);renderNotes()}
-  else if(d.n!==undefined){const i=+d.n;edit(e.target,notes[i],v=>{if(v)notes[i]=v;else notes.splice(i,1);renderNotes()})}});
+  if(d.nd!==undefined){snap();notes.splice(+d.nd,1);renderNotes()}
+  else if(d.n!==undefined){const old=notes[+d.n];edit(e.target,old,v=>{const i=notes[+d.n]===old?+d.n:notes.indexOf(old);if(i>=0){if(v)notes[i]=v;else{snap();notes.splice(i,1)}}renderNotes()})}});
 $("noteForm").addEventListener("submit",e=>{e.preventDefault();const i=$("noteInput");if(i.value.trim()){notes.push(i.value.trim());i.value="";renderNotes()}});
 
 /* Reihenfolge von Aufgaben und Notizen per Griffpunkt ändern */
@@ -393,6 +404,8 @@ let theme=load("theme","auto");
 function applyTheme(){if(theme==="auto"){if(hostTheme)root.dataset.theme=hostTheme;else delete root.dataset.theme}else root.dataset.theme=theme;
   $("theme").textContent={auto:"Automatisch",light:"Hell",dark:"Dunkel"}[theme]}
 $("theme").addEventListener("click",()=>{theme={auto:"light",light:"dark",dark:"auto"}[theme];save("theme",theme);applyTheme()});
+
+$("undo").addEventListener("click",()=>{if(!undoData)return;const d=JSON.parse(undoData);todos=d.todos;events=d.events;notes=d.notes;rec=d.rec;undoData=null;clearTimeout(undoT);$("undo").hidden=true;renderEvents();renderTodos();renderNotes()});
 
 /* Sichern und Wiederherstellen */
 let armed=false;
