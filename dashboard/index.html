@@ -1,7 +1,7 @@
 <title>Mein Tag</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;600&display=swap">
 <style>
 /* Layout: ein Bildschirm, eine Spalte – Titel, Woche, Termine, Aufgaben, Notizen; nur Haarlinien, viel Luft */
 :root{
@@ -17,23 +17,23 @@ body{background:var(--paper);color:var(--ink);font:300 16px/1.45 var(--body);box
   padding-left:max(22px,env(safe-area-inset-left,0px));padding-right:max(22px,env(safe-area-inset-right,0px));padding-block:14px 14px}
 .page{height:100%;max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
 header{flex:none;text-align:center}
-.date{font-size:12px;font-weight:400;letter-spacing:.18em;text-transform:uppercase;color:var(--soft);font-variant-numeric:tabular-nums}
+.date{font-size:12px;font-weight:300;letter-spacing:.18em;text-transform:uppercase;color:var(--soft);font-variant-numeric:tabular-nums}
 .week{flex:none;display:grid;grid-template-columns:repeat(7,1fr);text-align:center;border-block:1px solid var(--line);padding-block:6px}
 .week{row-gap:4px}
-.week button{background:none;border:0;border-radius:10px;color:var(--ink);padding:11px 0;cursor:pointer;font:400 18px var(--body);transition:background .15s;font-variant-numeric:tabular-nums;position:relative}
+.week button{background:none;border:0;border-radius:10px;color:var(--ink);padding:11px 0;cursor:pointer;font:300 18px var(--body);transition:background .15s;font-variant-numeric:tabular-nums;position:relative}
 .week .over{background:var(--line);outline:1px solid var(--accent)}
 .grip{flex:none;touch-action:none;cursor:grab;color:var(--soft);padding:0 6px 0 0;user-select:none;-webkit-user-select:none;font-size:14px;letter-spacing:-2px}
 .ghost{position:fixed;z-index:50;pointer-events:none;transform:translate(-50%,-120%);background:var(--paper);border:1px solid var(--ink);border-radius:8px;padding:6px 12px;font-size:14px;max-width:70vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 6px 20px rgba(0,0,0,.18)}
 .week small{display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--soft)}
 .week .today{color:var(--accent)}
-.week .sel{font-weight:500}
+.week .sel{font-weight:300}
 .week .sel::before{content:"";position:absolute;left:30%;right:30%;bottom:-7px;border-bottom:1px solid var(--ink)}
 .week .has::after{content:"";position:absolute;left:50%;top:2px;width:3px;height:3px;margin-left:10px;border-radius:50%;background:var(--accent)}
 section{display:flex;flex-direction:column;min-height:0}
 #cal{flex:0 1 auto;max-height:28%}
 #tasks{flex:1 1 auto}
 #notesSec{flex:0 0 22%}
-h2{flex:none;display:flex;justify-content:space-between;align-items:baseline;margin:0 0 4px;font:500 12px var(--display);letter-spacing:.16em;text-transform:uppercase}
+h2{flex:none;display:flex;justify-content:space-between;align-items:baseline;margin:0 0 4px;font:600 12px var(--display);letter-spacing:.16em;text-transform:uppercase}
 h2 span{font:300 12px var(--body);letter-spacing:.04em;text-transform:none;color:var(--soft)}
 ul{list-style:none;margin:0;padding:0;overflow-y:auto;min-height:0;flex:1 1 auto}
 li{display:flex;align-items:baseline;gap:12px;padding:5px 0}
