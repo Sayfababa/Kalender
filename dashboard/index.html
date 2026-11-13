@@ -46,16 +46,21 @@ li.done .txt{text-decoration:line-through;text-decoration-color:var(--soft);colo
 .empty{font-style:italic;color:var(--soft)}
 #eventList li{border-bottom:1px solid var(--line);padding:7px 0}
 #noteList li{gap:10px;padding:4px 0}
-#noteList li:not(.empty)::before{content:"–";color:var(--soft);flex:none}
+#noteList .dash{color:var(--soft);flex:none;margin-left:-2px}
 
 /* kleine Bedienelemente mit unsichtbar vergrößerter Tippfläche */
-.x,.check,.grip,.cdot{position:relative;flex:none}
-.x::after,.check::after,.grip::after,.cdot::after{content:"";position:absolute;inset:-11px}
+.x,.check,.grip,.rgrip,.cdot{position:relative;flex:none}
+.x::after,.check::after,.grip::after,.rgrip::after,.cdot::after{content:"";position:absolute;inset:-11px}
 .x{background:none;border:0;color:var(--soft);font-size:16px;padding:0 2px;cursor:pointer;opacity:.6}
 .check{width:15px;height:15px;border:1.5px solid var(--c,var(--ink));border-radius:50%;background:none;padding:0;cursor:pointer}
 li.done .check{background:var(--c,var(--ink))}
 .cdot{width:9px;height:9px;border-radius:50%;border:1px solid var(--soft);background:none;padding:0;cursor:pointer}
 .cdot[data-on]{border-color:transparent}
+.rgrip{touch-action:none;cursor:grab;color:var(--soft);user-select:none;-webkit-user-select:none;font-size:14px;letter-spacing:-2px;margin-right:-4px;opacity:.7}
+li.lift{opacity:.45}
+.grip,.rgrip{width:18px;text-align:left}
+.repi{flex:none;width:18px;color:var(--soft);font-size:13px;text-align:center;margin-right:-4px}
+.pick .rep{background:none;border:0;padding:0;font:inherit;letter-spacing:inherit;color:var(--ink);cursor:pointer;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px;margin-right:auto}
 .grip{touch-action:none;cursor:grab;color:var(--soft);user-select:none;-webkit-user-select:none;font-size:14px;letter-spacing:-2px;margin-right:-4px}
 .ghost{position:fixed;z-index:50;pointer-events:none;transform:translate(-50%,-120%);background:var(--paper);border:1px solid var(--ink);border-radius:8px;padding:6px 12px;font-size:14px;max-width:70vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 6px 20px rgba(0,0,0,.18)}
 .etime{position:relative;flex:none;cursor:pointer}
@@ -154,7 +159,14 @@ let todos=load("todos",[{t:"Beispiel: Zahnarzt anrufen",d:false},{t:"Beispiel: W
 let events=load("events",{[today]:[{h:"18:30",t:"Beispiel: Abendessen mit Freunden"}]});
 let notes=load("noteList",null);
 if(!notes)notes=String(load("notes","")).split("\n").map(s=>s.trim()).filter(Boolean);
+let rec=load("rec",[]);
 let sel=today, weekOffset=0;
+/* Termine eines Tages: einmalige plus wiederkehrende */
+function recOn(k){const d=new Date(k+"T12:00");return rec.map((r,i)=>({...r,i})).filter(r=>{if(k<r.start)return false;const s=new Date(r.start+"T12:00");
+  return r.r==="w"?d.getDay()===s.getDay():k.slice(5)===r.start.slice(5)})}
+function evsFor(k){return [...(events[k]||[]).map((x,i)=>({...x,ref:"e:"+i})),...recOn(k).map(x=>({...x,ref:"r:"+x.i}))]}
+const refObj=r=>{const [t,i]=r.split(":");return t==="r"?rec[+i]:events[sel]?.[+i]};
+const REP={"":"Einmalig",w:"Wöchentlich",y:"Jährlich"};let rep="";
 
 /* Datum, Uhr und Tageswechsel um Mitternacht */
 function tick(){const d=new Date();$("date").textContent=d.toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"})+" · "+d.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});
@@ -165,7 +177,7 @@ setInterval(tick,15000);document.addEventListener("visibilitychange",()=>{if(!do
 function renderWeek(){
   const n=new Date(),start=new Date(n.getFullYear(),n.getMonth(),n.getDate()-((n.getDay()+6)%7)+weekOffset*7,12);
   let h="",end;for(let i=0;i<14;i++){const d=new Date(start);d.setDate(start.getDate()+i);end=d;const k=key(d);
-    const cols=[...new Set((events[k]||[]).map(e=>colorOf(e.c)))].slice(0,4);
+    const cols=[...new Set(evsFor(k).map(e=>colorOf(e.c)))].slice(0,4);
     h+=`<button class="${k===today?"today ":""}${k===sel?"sel":""}" data-k="${k}" aria-label="${d.toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"})}"><span class="dots">${cols.map(c=>`<i style="background:${c}"></i>`).join("")}</span>${i<7?`<small>${d.toLocaleDateString("de-DE",{weekday:"short"}).slice(0,2)}</small>`:""}${d.getDate()}</button>`}
   $("week").innerHTML=h;
   const m=d=>d.toLocaleDateString("de-DE",{month:"long"});
@@ -187,12 +199,14 @@ function edit(span,val,commit){const inp=document.createElement("input");inp.typ
 
 /* Farbauswahl: freiwillig, mit Abbrechen */
 const pickHTML=`<span>Farbe</span>`+ORDER.map(c=>`<button type="button" data-c="${c}" style="${c?`background:${COL[c]}`:""}" aria-label="${NAME[c]}"></button>`).join("")+`<button type="button" class="x" data-cancel aria-label="Abbrechen">×</button>`;
-$("pick").innerHTML=$("tpick").innerHTML=pickHTML;
-function closePick(id){$(id).hidden=true}
+$("tpick").innerHTML=pickHTML;
+$("pick").innerHTML=pickHTML.replace(`<span>Farbe</span>`,`<button type="button" class="rep" id="rep" aria-label="Wiederholung ändern">Einmalig</button>`);
+function closePick(id){$(id).hidden=true;if(id==="pick"){rep="";$("rep").textContent=REP[""]}}
 function wirePick(pickId,inputId,formId,create){
   $(formId).addEventListener("submit",e=>{e.preventDefault();if($(inputId).value.trim())$(pickId).hidden=false;else{closePick(pickId);$(inputId).focus()}});
   $(inputId).addEventListener("input",()=>{if(!$(inputId).value.trim())closePick(pickId)});
   $(pickId).addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+    if(b.id==="rep"){rep={"":"w",w:"y",y:""}[rep];b.textContent=REP[rep];return}
     if(b.dataset.c!==undefined){const t=$(inputId).value.trim();if(t){create(t,b.dataset.c);$(inputId).value=""}}
     closePick(pickId)});
 }
@@ -200,16 +214,17 @@ function wirePick(pickId,inputId,formId,create){
 /* Termine */
 function renderEvents(){
   $("selLabel").textContent=sel===today?"heute":new Date(sel+"T12:00").toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"});
-  const ev=(events[sel]||[]).map((x,i)=>({...x,i})).sort((a,b)=>(a.h||"").localeCompare(b.h||""));
-  $("eventList").innerHTML=ev.length?ev.map(x=>`<li><span class="grip" data-g="${x.i}" aria-label="Ziehen, um den Termin auf einen anderen Tag zu legen">⋮⋮</span><label class="etime"><time>${esc(x.h||"—")}</time><select data-ti="${x.i}" aria-label="Uhrzeit ändern">${opts(x.h||"")}</select></label><button class="cdot" data-ec="${x.i}" ${COL[x.c]?`data-on style="background:${COL[x.c]}"`:""} aria-label="Farbe ändern"></button><span class="txt" data-et="${x.i}">${esc(x.t)}</span><button class="x" data-e="${x.i}" aria-label="Löschen">×</button></li>`).join(""):"";
-  save("events",events);renderWeek();
+  const ev=evsFor(sel).sort((a,b)=>(a.h||"").localeCompare(b.h||""));
+  $("eventList").innerHTML=ev.map(x=>`<li data-ref="${x.ref}">${x.ref[0]==="e"?`<span class="grip" data-g="${x.ref.slice(2)}" aria-label="Ziehen, um den Termin auf einen anderen Tag zu legen">⋮⋮</span>`:`<span class="repi" title="${REP[x.r]}" aria-label="${REP[x.r]}">↻</span>`}<label class="etime"><time>${esc(x.h||"—")}</time><select data-act="time" aria-label="Uhrzeit ändern">${opts(x.h||"")}</select></label><button class="cdot" data-act="col" ${COL[x.c]?`data-on style="background:${COL[x.c]}"`:""} aria-label="Farbe ändern"></button><span class="txt" data-act="txt">${esc(x.t)}</span><button class="x" data-act="del" aria-label="${x.ref[0]==="r"?"Serie löschen":"Löschen"}">×</button></li>`).join("");
+  save("events",events);save("rec",rec);renderWeek();
 }
-$("eventList").addEventListener("click",e=>{const d=e.target.dataset,list=events[sel];if(!list)return;
-  if(d.e!==undefined){list.splice(+d.e,1);if(!list.length)delete events[sel];renderEvents()}
-  else if(d.ec!==undefined){list[+d.ec].c=nextColor(list[+d.ec].c);renderEvents()}
-  else if(d.et!==undefined){const i=+d.et;edit(e.target,list[i].t,v=>{if(v&&events[sel]?.[i])events[sel][i].t=v;renderEvents()})}});
-$("eventList").addEventListener("change",e=>{const i=e.target.dataset.ti;if(i!==undefined&&events[sel]?.[+i]){events[sel][+i].h=e.target.value;renderEvents()}});
-wirePick("pick","evText","eventForm",(t,c)=>{(events[sel]=events[sel]||[]).push({h:$("evTime").value,t,c});$("evTime").value="";showTime();renderEvents()});
+$("eventList").addEventListener("click",e=>{const act=e.target.dataset.act,li=e.target.closest("li[data-ref]");if(!act||!li||act==="time")return;
+  const r=li.dataset.ref,o=refObj(r);if(!o)return;
+  if(act==="del"){const [t,i]=r.split(":");if(t==="r")rec.splice(+i,1);else{events[sel].splice(+i,1);if(!events[sel].length)delete events[sel]}renderEvents()}
+  else if(act==="col"){o.c=nextColor(o.c);renderEvents()}
+  else if(act==="txt"){edit(e.target,o.t,v=>{if(v)o.t=v;renderEvents()})}});
+$("eventList").addEventListener("change",e=>{if(e.target.dataset.act!=="time")return;const o=refObj(e.target.closest("li").dataset.ref);if(o){o.h=e.target.value;renderEvents()}});
+wirePick("pick","evText","eventForm",(t,c)=>{const h=$("evTime").value;if(rep)rec.push({t,h,c,r:rep,start:sel});else(events[sel]=events[sel]||[]).push({h,t,c});$("evTime").value="";showTime();renderEvents()});
 function showTime(){const v=$("evTime").value;$("tlabel").textContent=v?v+" Uhr":"Uhrzeit";$("tbox").classList.toggle("set",!!v)}
 $("evTime").addEventListener("change",showTime);
 
@@ -230,7 +245,7 @@ document.addEventListener("pointercancel",()=>endDrag(false));
 /* Aufgaben: offene oben, erledigte unten */
 function renderTodos(){
   const view=todos.map((x,i)=>({...x,i})).sort((a,b)=>(a.d?1:0)-(b.d?1:0));
-  $("todoList").innerHTML=view.length?view.map(x=>`<li class="${x.d?"done":""}"><button class="check" style="--c:${COL[x.c]||"var(--ink)"}" data-i="${x.i}" aria-label="${x.d?"Wieder öffnen":"Erledigt"}"></button><span class="txt" data-tt="${x.i}">${esc(x.t)}</span><button class="cdot" data-tc="${x.i}" ${COL[x.c]?`data-on style="background:${COL[x.c]}"`:""} aria-label="Farbe ändern"></button><button class="x" data-del="${x.i}" aria-label="Löschen">×</button></li>`).join(""):"";
+  $("todoList").innerHTML=view.length?view.map(x=>`<li class="${x.d?"done":""}" data-idx="${x.i}"><span class="rgrip" aria-label="Ziehen, um die Reihenfolge zu ändern">⋮⋮</span><button class="check" style="--c:${COL[x.c]||"var(--ink)"}" data-i="${x.i}" aria-label="${x.d?"Wieder öffnen":"Erledigt"}"></button><span class="txt" data-tt="${x.i}">${esc(x.t)}</span><button class="cdot" data-tc="${x.i}" ${COL[x.c]?`data-on style="background:${COL[x.c]}"`:""} aria-label="Farbe ändern"></button><button class="x" data-del="${x.i}" aria-label="Löschen">×</button></li>`).join(""):"";
   const done=todos.filter(x=>x.d).length;
   $("todoCount").textContent=`${todos.length-done} offen`+(done?" · ":"");$("clearDone").hidden=!done;
   save("todos",todos);
@@ -245,13 +260,25 @@ wirePick("tpick","todoInput","todoForm",(t,c)=>{todos.unshift({t,d:false,c});ren
 
 /* Notizen als Stichpunkte */
 function renderNotes(){
-  $("noteList").innerHTML=notes.length?notes.map((n,i)=>`<li><span class="txt" data-n="${i}">${esc(n)}</span><button class="x" data-nd="${i}" aria-label="Löschen">×</button></li>`).join(""):"";
+  $("noteList").innerHTML=notes.length?notes.map((n,i)=>`<li data-idx="${i}"><span class="rgrip" aria-label="Ziehen, um die Reihenfolge zu ändern">⋮⋮</span><span class="dash">–</span><span class="txt" data-n="${i}">${esc(n)}</span><button class="x" data-nd="${i}" aria-label="Löschen">×</button></li>`).join(""):"";
   save("noteList",notes);
 }
 $("noteList").addEventListener("click",e=>{const d=e.target.dataset;
   if(d.nd!==undefined){notes.splice(+d.nd,1);renderNotes()}
   else if(d.n!==undefined){const i=+d.n;edit(e.target,notes[i],v=>{if(v)notes[i]=v;else notes.splice(i,1);renderNotes()})}});
 $("noteForm").addEventListener("submit",e=>{e.preventDefault();const i=$("noteInput");if(i.value.trim()){notes.push(i.value.trim());i.value="";renderNotes()}});
+
+/* Reihenfolge von Aufgaben und Notizen per Griffpunkt ändern */
+let rdrag=null;
+function wireReorder(ulId,get,set,render){$(ulId).addEventListener("pointerdown",e=>{const g=e.target.closest(".rgrip");if(!g)return;e.preventDefault();
+  const li=g.closest("li");li.classList.add("lift");rdrag={ul:$(ulId),li,get,set,render};try{g.setPointerCapture(e.pointerId)}catch(_){}})}
+document.addEventListener("pointermove",e=>{if(!rdrag)return;const t=document.elementFromPoint(e.clientX,e.clientY)?.closest("li");
+  if(t&&t!==rdrag.li&&t.parentNode===rdrag.ul){const r=t.getBoundingClientRect();rdrag.ul.insertBefore(rdrag.li,e.clientY<r.top+r.height/2?t:t.nextSibling)}
+  const u=rdrag.ul.getBoundingClientRect();if(e.clientY<u.top+20)rdrag.ul.scrollTop-=8;else if(e.clientY>u.bottom-20)rdrag.ul.scrollTop+=8});
+function endReorder(){if(!rdrag)return;const {ul,get,set,render}=rdrag,a=get();rdrag=null;set([...ul.children].map(li=>a[+li.dataset.idx]));render()}
+document.addEventListener("pointerup",endReorder);document.addEventListener("pointercancel",endReorder);
+wireReorder("todoList",()=>todos,v=>todos=v,renderTodos);
+wireReorder("noteList",()=>notes,v=>notes=v,renderNotes);
 
 /* Darstellung: Auto / Hell / Dunkel */
 const root=document.documentElement,hostTheme=root.dataset.theme;
@@ -262,7 +289,7 @@ $("theme").addEventListener("click",()=>{theme={auto:"light",light:"dark",dark:"
 
 /* Sichern und Wiederherstellen */
 let armed=false;
-$("backup").addEventListener("click",()=>{$("sheetText").value=JSON.stringify({todos,events,notes});$("sheetMsg").textContent="";armed=false;$("sheetRestore").textContent="Wiederherstellen";$("sheet").hidden=false});
+$("backup").addEventListener("click",()=>{$("sheetText").value=JSON.stringify({todos,events,notes,rec});$("sheetMsg").textContent="";armed=false;$("sheetRestore").textContent="Wiederherstellen";$("sheet").hidden=false});
 $("sheetClose").addEventListener("click",()=>{$("sheet").hidden=true});
 $("sheetCopy").addEventListener("click",()=>{const t=$("sheetText");const ok=()=>$("sheetMsg").textContent="Kopiert.";
   const manual=()=>{t.focus();t.select();$("sheetMsg").textContent="Text ist markiert – bitte über „Kopieren“ im Menü kopieren."};
@@ -271,7 +298,7 @@ $("sheetText").addEventListener("input",()=>{armed=false;$("sheetRestore").textC
 $("sheetRestore").addEventListener("click",()=>{let d;try{d=JSON.parse($("sheetText").value)}catch(_){}
   if(!d||!Array.isArray(d.todos)||!Array.isArray(d.notes)||typeof d.events!=="object"||!d.events||Array.isArray(d.events)){$("sheetMsg").textContent="Das ist keine gültige Sicherung. Bitte den gesicherten Text vollständig einfügen.";return}
   if(!armed){armed=true;$("sheetRestore").textContent="Wirklich ersetzen?";$("sheetMsg").textContent="Die jetzigen Einträge werden durch die Sicherung ersetzt.";return}
-  todos=d.todos;events=d.events;notes=d.notes;renderEvents();renderTodos();renderNotes();$("sheet").hidden=true});
+  todos=d.todos;events=d.events;notes=d.notes;rec=Array.isArray(d.rec)?d.rec:[];renderEvents();renderTodos();renderNotes();$("sheet").hidden=true});
 
 /* Tastatur: Seite auf den sichtbaren Bereich verkleinern, damit das aktive Feld nicht verdeckt wird */
 if(window.visualViewport){const vv=window.visualViewport;vv.addEventListener("resize",()=>{
