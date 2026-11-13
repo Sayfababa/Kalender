@@ -1,0 +1,61 @@
+"""Baut die eigenständige iPhone-App (index.html im Hauptordner) aus dashboard/index.html.
+
+Nach jeder Änderung an dashboard/index.html:  python3 build.py
+"""
+from pathlib import Path
+
+root = Path(__file__).parent
+src = (root / "dashboard" / "index.html").read_text(encoding="utf-8")
+
+# Leer starten statt mit Beispiel-Einträgen
+src = src.replace(
+    'load("todos",[{t:"Beispiel: Zahnarzt anrufen",d:false},{t:"Beispiel: Wocheneinkauf",d:true}])',
+    'load("todos",[])',
+).replace(
+    'load("events",{[today]:[{h:"18:30",t:"Beispiel: Abendessen mit Freunden"}]})',
+    'load("events",{})',
+)
+assert "Beispiel:" not in src, "Beispiel-Einträge nicht ersetzt"
+
+head = """<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mein Tag">
+<meta name="theme-color" content="#f8f7f3" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#171614" media="(prefers-color-scheme: dark)">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+/* Sofort Papierfarbe statt weißem Aufblitzen */
+html{background:#f8f7f3}
+@media (prefers-color-scheme: dark){html{background:#171614}}
+body{margin:0}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+"""
+
+tail = """
+<style>
+/* Eigenständige App: Notch / Dynamic Island und Home-Leiste freihalten */
+html,body{overscroll-behavior:none;-webkit-text-size-adjust:100%}
+body{-webkit-tap-highlight-color:transparent;
+  padding-top:calc(14px + env(safe-area-inset-top,0px))!important;
+  padding-bottom:calc(10px + env(safe-area-inset-bottom,0px))!important}
+</style>
+<script>
+if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(function(){})}
+</script>
+</body>
+</html>
+"""
+
+(root / "index.html").write_text(head + src + tail, encoding="utf-8")
+print("index.html gebaut")

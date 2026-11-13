@@ -136,6 +136,8 @@ input::placeholder,textarea::placeholder{color:var(--soft)}
 .pick button[data-c]::after{content:"";position:absolute;inset:-8px}
 
 footer{flex:none;display:flex;justify-content:space-between;margin-top:auto}
+#bkAge{letter-spacing:.06em;text-transform:none}
+#bkAge.late{color:var(--accent)}
 footer #undo{color:var(--ink);text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--soft)}
 footer button{background:none;border:0;padding:4px 0;cursor:pointer;font-size:10px}
 
@@ -179,7 +181,7 @@ footer button{background:none;border:0;padding:4px 0;cursor:pointer;font-size:10
     <form id="noteForm"><input type="text" id="noteInput" placeholder="Neue Notiz" autocomplete="off"><button class="add" type="submit" aria-label="Notiz hinzufügen"><svg viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="13.4" stroke-width="1"/><path d="M14 8.5v11M8.5 14h11"/></svg></button></form>
   </section>
 
-  <footer><button id="backup">Sichern</button><button id="undo" hidden>Rückgängig</button><button id="theme"></button></footer>
+  <footer><button id="backup">Sichern<span id="bkAge"></span></button><button id="undo" hidden>Rückgängig</button><button id="theme"></button></footer>
 </div>
 
 <div id="tsheet" hidden>
@@ -414,6 +416,10 @@ $("undo").addEventListener("click",()=>{if(!undoData)return;const d=JSON.parse(u
 let armed=false;
 $("backup").addEventListener("click",()=>{$("sheetText").value=JSON.stringify({todos,events,notes,rec});$("sheetMsg").textContent="";armed=false;$("sheetRestore").textContent="Wiederherstellen";$("sheet").hidden=false});
 $("sheetClose").addEventListener("click",()=>{$("sheet").hidden=true});
+/* Erinnerung: wie lange ist die letzte Sicherung her */
+function bkShow(){const l=load("lastBackup",null),e=$("bkAge");if(!l){e.textContent=" · noch nie";e.className="late";return}
+  const n=diff(l,today);e.textContent=n===0?" · heute":n===1?" · gestern":` · vor ${n} Tagen`;e.className=n>=14?"late":""}
+$("sheetCopy").addEventListener("click",()=>{save("lastBackup",today);bkShow()});
 $("sheetCopy").addEventListener("click",()=>{const t=$("sheetText");const ok=()=>$("sheetMsg").textContent="Kopiert.";
   const manual=()=>{t.focus();t.select();$("sheetMsg").textContent="Text ist markiert – bitte über „Kopieren“ im Menü kopieren."};
   try{navigator.clipboard.writeText(t.value).then(ok,manual)}catch(_){manual()}});
@@ -434,5 +440,5 @@ function fit(){zoomF=Math.min(1.1,Math.max(1,window.innerHeight/700));const p=$(
   p.style.transformOrigin="50% 0";p.style.transform=zoomF>1?`scale(${zoomF})`:"";p.style.width=(100/zoomF)+"%";p.style.height=(100/zoomF)+"%"}
 window.addEventListener("resize",()=>{if(!document.activeElement||document.activeElement.tagName!=="INPUT")fit()});fit();
 
-applyTheme();tick();renderEvents();renderTodos();renderNotes();
+applyTheme();tick();renderEvents();renderTodos();renderNotes();bkShow();
 </script>
