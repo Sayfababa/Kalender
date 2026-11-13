@@ -470,10 +470,14 @@ applyTheme();tick();renderEvents();renderTodos();renderNotes();bkShow();
 /* Eigenständige App: Notch / Dynamic Island und Home-Leiste freihalten */
 html,body{overscroll-behavior:none;-webkit-text-size-adjust:100%}
 body{-webkit-tap-highlight-color:transparent;
-  padding-top:calc(14px + env(safe-area-inset-top,0px))!important;
-  padding-bottom:calc(10px + env(safe-area-inset-bottom,0px))!important}
+  padding-top:calc(26px + env(safe-area-inset-top,0px))!important;
+  padding-bottom:calc(30px + max(6px,env(safe-area-inset-bottom,0px) - 20px))!important}
+/* Sichern / Hell ganz unten in den Ecken, neben der Home-Leiste */
+body>footer.app-foot{position:fixed;left:0;right:0;bottom:0;margin:0;z-index:5;display:flex;justify-content:space-between;
+  padding:0 max(22px,env(safe-area-inset-right,0px)) max(6px,calc(env(safe-area-inset-bottom,0px) - 20px)) max(22px,env(safe-area-inset-left,0px))}
 </style>
 <script>
+(function(){var f=document.querySelector(".page>footer");if(f){f.classList.add("app-foot");document.body.appendChild(f)}})();
 if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(function(){})}
 </script>
 </body>
