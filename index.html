@@ -67,8 +67,8 @@ section{display:flex;flex-direction:column;min-height:0}
 #upList li[hidden]{display:none}
 .udot{flex:none;width:7px;height:7px;border-radius:50%;box-sizing:border-box}
 .udot.ring{background:none!important;border:1px solid var(--rc)}
-.udate{flex:none;min-width:68px;font-size:13px;color:var(--soft);font-variant-numeric:tabular-nums;white-space:nowrap}
-#upList time{min-width:34px}
+.udate{flex:none;min-width:84px;font-size:15px;color:var(--soft);font-variant-numeric:tabular-nums;white-space:nowrap}
+#upList time{min-width:44px}
 #upList .txt{cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* Aufgaben: feine Linie darunter, mit Frist als Zeitstrahl */
 #todoList li{position:relative;padding:8px 0 9px}
@@ -76,7 +76,7 @@ section{display:flex;flex-direction:column;min-height:0}
 .tl i{position:absolute;left:0;top:0;bottom:0;width:var(--p);background:var(--f,var(--ink));transition:width .4s}
 .tl.late i{background:var(--accent)}
 li.done .tl i{opacity:.25}
-.due{flex:none;font-size:13px;color:var(--soft);font-variant-numeric:tabular-nums;white-space:nowrap}
+.due{flex:none;font-size:15px;color:var(--soft);font-variant-numeric:tabular-nums;white-space:nowrap}
 .due.soon{color:var(--ink)}
 .due.late{color:var(--accent)}
 /* Aufgaben-Blatt: Farbe und Frist */
@@ -99,7 +99,7 @@ h2 button{background:none;border:0;padding:0;cursor:pointer;text-decoration:unde
 ul{list-style:none;margin:0;padding:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior-x:none;touch-action:pan-y;min-height:0;flex:0 1 auto}
 li{display:flex;align-items:center;gap:12px;padding:5px 0}
 li .txt{flex:1;min-width:0;overflow-wrap:anywhere;cursor:text}
-li time{font-size:13px;color:var(--soft);min-width:38px;display:inline-block;font-variant-numeric:tabular-nums}
+li time{font-size:15px;color:var(--soft);min-width:44px;display:inline-block;font-variant-numeric:tabular-nums}
 li.done .txt{text-decoration:line-through;text-decoration-color:var(--soft);color:var(--soft)}
 #eventList li{border-bottom:1px solid var(--line);padding:7px 0}
 
@@ -158,7 +158,7 @@ input::placeholder,textarea::placeholder{color:var(--soft)}
 .add{width:24px;height:24px}
 .add svg{width:24px;height:24px;stroke:var(--soft)}
 .add svg circle{display:none}
-.tbox{flex:none;position:relative;display:flex;align-items:center;gap:8px;background:none;border:0;padding:0;font:300 13px var(--body);color:var(--ink);white-space:nowrap;font-variant-numeric:tabular-nums;cursor:pointer}
+.tbox{flex:none;position:relative;display:flex;align-items:center;gap:8px;background:none;border:0;padding:0;font:300 15px var(--body);color:var(--ink);white-space:nowrap;font-variant-numeric:tabular-nums;cursor:pointer}
 .tbox::after{content:"";position:absolute;inset:-8px}
 #tlabel:empty{display:none}
 
