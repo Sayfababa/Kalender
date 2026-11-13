@@ -15,7 +15,7 @@
 html,body{height:100%}
 body{background:var(--paper);color:var(--ink);font:300 16px/1.45 var(--body);box-sizing:border-box;overflow:hidden;
   padding-left:max(22px,env(safe-area-inset-left,0px));padding-right:max(22px,env(safe-area-inset-right,0px));padding-block:14px 14px}
-.page{height:100%;max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.page{height:100%;max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:26px}
 header{flex:none;text-align:center}
 .date{font-size:12px;font-weight:300;letter-spacing:.18em;text-transform:uppercase;color:var(--soft);font-variant-numeric:tabular-nums}
 .week{flex:none;display:grid;grid-template-columns:repeat(7,1fr);text-align:center;border-block:1px solid var(--line);padding-block:6px}
@@ -32,7 +32,11 @@ header{flex:none;text-align:center}
 section{display:flex;flex-direction:column;min-height:0}
 #cal{flex:0 1 auto;max-height:28%}
 #tasks{flex:0 1 auto}
-#notesSec{flex:1 1 auto;min-height:90px}
+#notesSec{flex:0 1 auto;max-height:24%}
+#noteList li{gap:10px;padding:4px 0}
+#noteList li::before{content:"–";color:var(--soft);flex:none}
+#noteList span{cursor:text}
+#noteList input{flex:1;min-width:0;padding:0;border-bottom:1px solid var(--ink)}
 h2{flex:none;display:flex;justify-content:space-between;align-items:baseline;margin:0 0 4px;font:600 12px var(--display);letter-spacing:.16em;text-transform:uppercase}
 h2 span{font:300 12px var(--body);letter-spacing:.04em;text-transform:none;color:var(--soft)}
 ul{list-style:none;margin:0;padding:0;overflow-y:auto;min-height:0;flex:1 1 auto}
@@ -86,7 +90,8 @@ textarea{flex:1;min-height:0;resize:none;padding:4px 0;line-height:1.5;
 
   <section id="notesSec">
     <h2>Notizen</h2>
-    <textarea id="notes" placeholder="Etwas notieren …"></textarea>
+    <ul id="noteList"></ul>
+    <form id="noteForm"><input type="text" id="noteInput" placeholder="Neue Notiz" autocomplete="off"><button class="add" type="submit" aria-label="Notiz hinzufügen">+</button></form>
   </section>
 </div>
 
@@ -150,6 +155,21 @@ document.addEventListener("pointermove",moveDrag);
 document.addEventListener("pointerup",()=>endDrag(true));
 document.addEventListener("pointercancel",()=>endDrag(false));
 
-const notes=$("notes");notes.value=load("notes","");notes.addEventListener("input",()=>save("notes",notes.value));
+/* Notizen als Stichpunkte; Antippen = bearbeiten */
+let notes=load("noteList",null);
+if(!notes){notes=String(load("notes","")).split("\n").map(s=>s.trim()).filter(Boolean)}
+function renderNotes(){
+  $("noteList").innerHTML=notes.length?notes.map((n,i)=>`<li><span data-n="${i}">${esc(n)}</span><button class="x" data-nd="${i}" aria-label="Löschen">×</button></li>`).join(""):`<li class="empty">Noch keine Notizen</li>`;
+  save("noteList",notes);
+}
+$("noteList").addEventListener("click",e=>{
+  const d=e.target.dataset.nd;if(d!==undefined){notes.splice(+d,1);renderNotes();return}
+  const s=e.target.closest("span[data-n]");if(!s)return;const i=+s.dataset.n;
+  const inp=document.createElement("input");inp.type="text";inp.id="noteEdit";inp.value=notes[i];s.replaceWith(inp);inp.focus();
+  let done=false;const fin=()=>{if(done)return;done=true;const v=inp.value.trim();if(v)notes[i]=v;else notes.splice(i,1);renderNotes()};
+  inp.addEventListener("blur",fin);inp.addEventListener("keydown",ev=>{if(ev.key==="Enter"){ev.preventDefault();inp.blur()}});
+});
+$("noteForm").addEventListener("submit",e=>{e.preventDefault();const i=$("noteInput");if(i.value.trim()){notes.push(i.value.trim());i.value="";renderNotes()}});
+renderNotes();
 renderEvents();renderTodos();
 </script>
